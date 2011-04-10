@@ -24,6 +24,25 @@ int testnum = 1;
 //	purposes.
 //----------------------------------------------------------------------
 
+#ifdef(CHANGED) && (THREADS)
+int SharedVariable;
+
+void
+SimpleThread(int which)
+{
+	int num, val;
+	
+	for(num = 0; num < 5; num++) {
+	    val = SharedVariable;
+	    printf("*** thread %d sees value %d\n", which, val);
+	    currentThread->Yield();
+	    SharedVariable = val+1;
+	    currentThread->Yield();
+	}
+	val = SharedVariable;
+	printf("Thread %d sees final value %d\n", which, val);
+}
+#else
 void
 SimpleThread(int which)
 {
@@ -34,6 +53,8 @@ SimpleThread(int which)
         currentThread->Yield();
     }
 }
+
+#endif
 
 //----------------------------------------------------------------------
 // ThreadTest1
@@ -51,6 +72,31 @@ ThreadTest1()
     t->Fork(SimpleThread, 1);
     SimpleThread(0);
 }
+#ifdef (CHANGED) && (THREADS)
+void
+ThreadTest(int n)
+{
+	DEBUG('t', "Entering ThreadTest invoking n threads");
+	
+	Thread *ts[n];
+	
+	for(int i=0;i<n;i++)
+	{
+		*ts[i] = new Thread(strcat("forked thread ",atoc(i))); // I am not sure whether it atoc works or not - I haven't check it. 
+		
+		ts[i]->Fork(SimpleThread, i);  						
+	}
+	
+	/* the original code
+    Thread *t = new Thread("forked thread");
+	
+    t->Fork(SimpleThread, 1);
+    SimpleThread(0);
+	 */
+	
+}
+#endif
+
 
 //----------------------------------------------------------------------
 // ThreadTest
