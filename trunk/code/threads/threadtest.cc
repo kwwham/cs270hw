@@ -82,7 +82,7 @@ ThreadTest(int n)
 	
 	for(int i=0;i<n;i++)
 	{
-		*ts[i] = new Thread(strcat("forked thread ",atoc(i))); // I am not sure whether it atoc works or not - I haven't check it. 
+		*ts[i] = new Thread(strcat("forked thread ", "itoc(i, buf, 10)")); // I am not sure whether it itoc works or not - I haven't check it. 
 		
 		ts[i]->Fork(SimpleThread, i);  						
 	}
