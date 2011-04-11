@@ -79,11 +79,11 @@ ThreadTest(int n)
 {
 	DEBUG('t', "Entering ThreadTest invoking n threads");
 	
-	Thread *ts[n] = malloc(n*sizeof(Thread));
+	Thread *ts[n];
 	
 	for(int i=0;i<n;i++)
 	{
-		*sts[i] = new Thread("forked thread"); //strcat("forked thread ", "itoc(i, buf, 10)")); // I am not sure whether it itoc works or not - I haven't check it. 
+		ts[i] = new Thread("forked thread"); //strcat("forked thread ", "itoc(i, buf, 10)")); // I am not sure whether it itoc works or not - I haven't check it. 
 		
 		ts[i]->Fork(SimpleThread, i);  						
 	}
