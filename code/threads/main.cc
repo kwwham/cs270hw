@@ -108,7 +108,8 @@ main(int argc, char **argv)
 	argCount = 1;
         if (!strcmp(*argv, "-z"))               // print copyright
             printf (copyright);
-#ifdef USER_PROGRAM
+#ifdef USER_PROGRAM 
+//- userprog/nachos -x binarycode
         if (!strcmp(*argv, "-x")) {        	// run a user program
 	    ASSERT(argc > 1);
             StartProcess(*(argv + 1));

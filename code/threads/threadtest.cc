@@ -24,7 +24,7 @@ int testnum = 1;
 //	purposes.
 //----------------------------------------------------------------------
 
-#ifdef(CHANGED) && (THREADS)
+#ifdef CHANGED && THREADS
 int SharedVariable;
 
 void
@@ -53,7 +53,6 @@ SimpleThread(int which)
         currentThread->Yield();
     }
 }
-
 #endif
 
 //----------------------------------------------------------------------
@@ -72,17 +71,19 @@ ThreadTest1()
     t->Fork(SimpleThread, 1);
     SimpleThread(0);
 }
-#ifdef (CHANGED) && (THREADS)
+
+#ifdef CHANGED && THREADS
+
 void
 ThreadTest(int n)
 {
 	DEBUG('t', "Entering ThreadTest invoking n threads");
 	
-	Thread *ts[n];
+	Thread *ts[n] = malloc(n*sizeof(Thread));
 	
 	for(int i=0;i<n;i++)
 	{
-		*ts[i] = new Thread(strcat("forked thread ", "itoc(i, buf, 10)")); // I am not sure whether it itoc works or not - I haven't check it. 
+		*sts[i] = new Thread("forked thread"); //strcat("forked thread ", "itoc(i, buf, 10)")); // I am not sure whether it itoc works or not - I haven't check it. 
 		
 		ts[i]->Fork(SimpleThread, i);  						
 	}
@@ -95,7 +96,9 @@ ThreadTest(int n)
 	 */
 	
 }
+
 #endif
+
 
 
 //----------------------------------------------------------------------
