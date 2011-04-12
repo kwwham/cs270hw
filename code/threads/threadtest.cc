@@ -15,6 +15,10 @@
 // testnum is set in main.cc
 int testnum = 1;
 
+#ifdef HW1_SEMAPHORE
+Semaphore *s;
+#endif
+
 //----------------------------------------------------------------------
 // SimpleThread
 // 	Loop 5 times, yielding the CPU to another ready thread 
@@ -34,14 +38,27 @@ SimpleThread(int which)
 	int num, val;
 	
 	for(num = 0; num < 5; num++) {
+   #ifdef HW1_SEMAPHORE
+      s->P();
+   #endif
 	    val = SharedVariable;
 	    printf("*** thread %d sees value %d\n", which, val);
 	    currentThread->Yield();
 	    SharedVariable = val+1;
 	    currentThread->Yield();
-	}
-	val = SharedVariable;
-	printf("Thread %d sees final value %d\n", which, val);
+   #ifdef HW1_SEMAPHORE
+      s->V();
+   #endif
+
+}
+   #ifdef HW1_SEMAPHORE
+      s->P();
+   #endif
+   val = SharedVariable;
+	 printf("Thread %d sees final value %d\n", which, val);
+   #ifdef HW1_SEMAPHORE
+      s->V();
+   #endif
 }
 
 #else
@@ -79,6 +96,10 @@ ThreadTest1()
 void
 ThreadTest(int n)
 {
+  #ifdef HW1_SEMAPHORE
+  s = new Semaphore("test",1);
+  #endif
+  
 	DEBUG('t', "Entering ThreadTest invoking n threads");
 	printf("n=%d", n);
 	
