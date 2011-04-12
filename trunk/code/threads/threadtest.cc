@@ -45,11 +45,11 @@ SimpleThread(int which)
 	    printf("*** thread %d sees value %d\n", which, val);
 	    currentThread->Yield();
 	    SharedVariable = val+1;
-	    currentThread->Yield();
    #ifdef HW1_SEMAPHORE
       s->V();
    #endif
-
+	    currentThread->Yield();
+   
 }
    #ifdef HW1_SEMAPHORE
       s->P();
