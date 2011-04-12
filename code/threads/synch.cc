@@ -97,6 +97,60 @@ Semaphore::V()
     (void) interrupt->SetLevel(oldLevel);
 }
 
+
+/*
+ *
+ *
+ *
+ * Comment from Joon: 
+ * Lock is basically the same as semaphore speciallized to the value is one
+ *
+ *
+ *
+ */
+#ifdef HW1_LOCKS
+Lock::Lock(char* debugName) 
+{
+	name = debugName;
+	queue = new List;
+	value = 1;
+}
+Lock::~Lock() 
+{
+	delete queue;
+}
+void Lock::Acquire() 
+{
+	IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts - why do we need?
+	
+	while(isHeldByCurrentThread())
+	{
+		queue->append((void *)currentThread);
+		currentThread->sleep();
+	}
+	value--;
+	
+	(void) interrupt->SetLevel(oldLevel);	// re-enable interrupts - do we need these?
+}
+void Lock::Release() 
+{
+    Thread *thread;
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
+	
+    thread = (Thread *)queue->Remove();
+    if (thread != NULL)
+		scheduler->ReadyToRun(thread);
+    value++;
+    (void) interrupt->SetLevel(oldLevel);	
+}
+
+bool isHeldByCurrentThread()
+{
+	return value==0;
+}
+
+#else
+
 // Dummy functions -- so we can compile our later assignments 
 // Note -- without a correct implementation of Condition::Wait(), 
 // the test case in the network assignment won't work!
@@ -104,9 +158,11 @@ Lock::Lock(char* debugName) {}
 Lock::~Lock() {}
 void Lock::Acquire() {}
 void Lock::Release() {}
+#endif
 
 Condition::Condition(char* debugName) { }
 Condition::~Condition() { }
 void Condition::Wait(Lock* conditionLock) { ASSERT(FALSE); }
 void Condition::Signal(Lock* conditionLock) { }
 void Condition::Broadcast(Lock* conditionLock) { }
+

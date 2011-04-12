@@ -79,6 +79,13 @@ class Lock {
 
   private:
     char* name;				// for debugging
+
+#ifdef HW1_LOCKS	
+	
+	int value;
+	List* queue;
+	
+#endif
     // plus some other stuff you'll need to define
 };
 
@@ -134,3 +141,4 @@ class Condition {
     // plus some other stuff you'll need to define
 };
 #endif // SYNCH_H
+
