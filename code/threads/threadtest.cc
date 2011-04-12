@@ -25,6 +25,7 @@ int testnum = 1;
 //----------------------------------------------------------------------
 
 #ifdef CHANGED && THREADS
+
 int SharedVariable;
 
 void
@@ -42,6 +43,7 @@ SimpleThread(int which)
 	val = SharedVariable;
 	printf("Thread %d sees final value %d\n", which, val);
 }
+
 #else
 void
 SimpleThread(int which)
@@ -78,6 +80,7 @@ void
 ThreadTest(int n)
 {
 	DEBUG('t', "Entering ThreadTest invoking n threads");
+	printf("n=%d", n);
 	
 	Thread *ts[n];
 	
@@ -85,15 +88,8 @@ ThreadTest(int n)
 	{
 		ts[i] = new Thread("forked thread"); //strcat("forked thread ", "itoc(i, buf, 10)")); // I am not sure whether it itoc works or not - I haven't check it. 
 		
-		ts[i]->Fork(SimpleThread, i);  						
+		ts[i]->Fork(SimpleThread, i); 				
 	}
-	
-	/* the original code
-    Thread *t = new Thread("forked thread");
-	
-    t->Fork(SimpleThread, 1);
-    SimpleThread(0);
-	 */
 	
 }
 
@@ -109,6 +105,10 @@ ThreadTest(int n)
 void
 ThreadTest()
 {
+//printf("testnum=%d\n",testnum);
+#ifdef CHANGED
+    ThreadTest(testnum);
+#else
     switch (testnum) {
     case 1:
 	ThreadTest1();
@@ -117,5 +117,6 @@ ThreadTest()
 	printf("No test specified.\n");
 	break;
     }
+#endif
 }
 
