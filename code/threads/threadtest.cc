@@ -11,14 +11,10 @@
 
 #include "copyright.h"
 #include "system.h"
+#include "synch.h"
 
 // testnum is set in main.cc
 int testnum = 1;
-
-#ifdef HW1_SEMAPHORE
-Semaphore *s;
-#endif
-
 //----------------------------------------------------------------------
 // SimpleThread
 // 	Loop 5 times, yielding the CPU to another ready thread 
@@ -28,9 +24,13 @@ Semaphore *s;
 //	purposes.
 //----------------------------------------------------------------------
 
-#ifdef CHANGED && THREADS
-
+#if defined(CHANGED) && defined(THREADS)
 int SharedVariable;
+#if defined(HW1_SEMAPHORES)
+Semaphore *s;
+#elif defined(HW1_LOCKS)
+Lock *l;
+#endif
 
 void
 SimpleThread(int which)
@@ -38,27 +38,38 @@ SimpleThread(int which)
 	int num, val;
 	
 	for(num = 0; num < 5; num++) {
-   #ifdef HW1_SEMAPHORE
-      s->P();
-   #endif
+#if defined(HW1_SEMAPHORES)
+s->P();
+#elif defined(HW1_LOCKS)
+l->Acquire();
+#endif
 	    val = SharedVariable;
 	    printf("*** thread %d sees value %d\n", which, val);
 	    currentThread->Yield();
 	    SharedVariable = val+1;
-   #ifdef HW1_SEMAPHORE
-      s->V();
-   #endif
+#if defined(HW1_SEMAPHORES)
+s->V();
+#elif defined(HW1_LOCKS)
+l->Release();
+#endif
 	    currentThread->Yield();
-   
-}
-   #ifdef HW1_SEMAPHORE
-      s->P();
-   #endif
-   val = SharedVariable;
-	 printf("Thread %d sees final value %d\n", which, val);
-   #ifdef HW1_SEMAPHORE
-      s->V();
-   #endif
+	}
+
+printf("outside define\n");
+#if defined(HW1_SEMAPHORES)
+printf("inside semaphore1\n");
+s->P();
+#elif defined(HW1_LOCKS)
+printf("inside locks\n");
+l->Acquire();
+#endif
+      val = SharedVariable;
+      printf("Thread %d sees final value %d\n", which, val);
+#if defined(HW1_SEMAPHORES)
+s->V();
+#elif defined(HW1_LOCKS)
+l->Release();
+#endif
 }
 
 #else
@@ -73,6 +84,8 @@ SimpleThread(int which)
     }
 }
 #endif
+
+
 
 //----------------------------------------------------------------------
 // ThreadTest1
@@ -91,31 +104,27 @@ ThreadTest1()
     SimpleThread(0);
 }
 
-#ifdef CHANGED && THREADS
-
 void
 ThreadTest(int n)
 {
-  #ifdef HW1_SEMAPHORE
-  s = new Semaphore("test",1);
-  #endif
-  
+	#if defined(CHANGED) && defined(THREADS) && defined(HW1_SEMAPHORES)
+  	s = new Semaphore("test",1);  
+	#elif defined(CHANGED) && defined(THREADS) && defined(HW1_LOCKS)
+	l = new Lock("test");
+	#endif
+
 	DEBUG('t', "Entering ThreadTest invoking n threads");
-	printf("n=%d", n);
 	
 	Thread *ts[n];
 	
 	for(int i=1;i<n;i++)
 	{
-		ts[i] = new Thread("forked thread"); //strcat("forked thread ", "itoc(i, buf, 10)")); // I am not sure whether it itoc works or not - I haven't check it. 
-		
+		ts[i] = new Thread("forked thread"); 
 		ts[i]->Fork(SimpleThread, i); 				
 	}
 	SimpleThread(0);
 	
 }
-
-#endif
 
 
 
