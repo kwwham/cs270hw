@@ -50,10 +50,23 @@ Semaphore *s;
 Lock *l;
 #endif
 
+
+#ifdef HW1_COST
+char dummy[8*1024];
+#endif
+
+
 void
-SimpleThread(int which)
+SimpleThread(int which) 
 {
-   	int num, val ; 
+   	int num, val;
+
+#ifdef HW1_COST
+//char dummy[8*1024*1024];
+int indexForDummy = which*10;
+char c;
+#endif
+ 
 	
 	for(num = 0; num < 5; num++) 
         {
@@ -62,6 +75,11 @@ s->P();
 #elif defined(HW1_LOCKS)
 l->Acquire();
 #endif
+
+#ifdef HW1_COST
+c = dummy[indexForDummy++];
+#endif
+
 	    val = SharedVariable;
 	    printf("*** thread %d sees value %d\n", which, val);
 	    currentThread->Yield();
@@ -97,9 +115,6 @@ s->V();
 l->Release();
 #endif
 	
-#if defined(HW1_COST)
-printf("everage time of switching: %f\n", scheduler->getEverageTime());    
-#endif
 }
 
 #else
@@ -135,7 +150,7 @@ ThreadTest1()
 }
 
 void
-ThreadTest(int n)
+ThreadTest(int n) 
 {
 	#if defined(CHANGED) && defined(THREADS) && defined(HW1_SEMAPHORES)
   	s = new Semaphore("test",1);  
@@ -153,6 +168,7 @@ ThreadTest(int n)
 		ts[i]->Fork(SimpleThread, i); 				
 	}
 	SimpleThread(0);
+
 	
 }
 

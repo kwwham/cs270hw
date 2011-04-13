@@ -101,6 +101,11 @@ main(int argc, char **argv)
       }
     }
     ThreadTest();
+
+#if defined(HW1_COST)
+printf("everage time of switching: %f\n", scheduler->getEverageTime());    
+#endif
+
 #endif
 
     for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
