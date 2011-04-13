@@ -7,7 +7,7 @@
 # All rights reserved.  See copyright.h for copyright notice and limitation 
 # of liability and disclaimer of warranty provisions.
 
-DEFINES = -DTHREADS -DCHANGED
+DEFINES = -DTHREADS -DHW1_SEMAPHORES -DHW1_COST
 INCPATH = -I../threads -I../machine
 HFILES = $(THREAD_H)
 CFILES = $(THREAD_C)
@@ -56,7 +56,10 @@ scheduler.o: ../threads/scheduler.cc ../threads/copyright.h \
  /usr/include/bits/sys_errlist.h /usr/include/string.h \
  /usr/include/xlocale.h ../threads/thread.h ../threads/system.h \
  ../machine/interrupt.h ../threads/list.h ../machine/stats.h \
- ../machine/timer.h ../threads/utility.h
+ ../machine/timer.h ../threads/utility.h /usr/include/time.h \
+ /usr/include/bits/time.h /usr/include/sys/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h
 synch.o: ../threads/synch.cc ../threads/copyright.h ../threads/synch.h \
  ../threads/thread.h ../threads/utility.h ../threads/bool.h \
  ../machine/sysdep.h ../threads/copyright.h /usr/include/stdio.h \
