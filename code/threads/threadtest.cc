@@ -23,11 +23,27 @@ int testnum = 1;
 //	"which" is simply a number identifying the thread, for debugging
 //	purposes.
 //----------------------------------------------------------------------
-
+int ThreadPool[20];
+int number;
 #if defined(CHANGED) && defined(THREADS)
 int SharedVariable;
 #if defined(HW1_SEMAPHORES)
 Semaphore *s;
+// Implementing barriers
+int Wait()
+{
+	int counter=1;
+	for(int i=0;i<number;i++)
+	{
+		if(ThreadPool[i]==0)
+		{
+			counter=0;
+			break;
+		}
+	}
+	return counter;
+}
+//end of the function for barriers
 #elif defined(HW1_LOCKS)
 Lock *l;
 #endif
@@ -35,9 +51,10 @@ Lock *l;
 void
 SimpleThread(int which)
 {
-	int num, val;
+        int num, val ;
 	
-	for(num = 0; num < 5; num++) {
+	for(num = 0; num < 5; num++) 
+        {
 #if defined(HW1_SEMAPHORES)
 s->P();
 #elif defined(HW1_LOCKS)
@@ -55,16 +72,22 @@ l->Release();
 	    currentThread->Yield();
 	}
 
-printf("outside define\n");
-#if defined(HW1_SEMAPHORES)
-printf("inside semaphore1\n");
+	//printf("outside define\n");
+	#if defined(HW1_SEMAPHORES)
+	//printf("inside semaphore1\n");
+	ThreadPool[which]=1;
+        while(Wait()==0)
+	{
+	currentThread->Yield();
+	}
+
 s->P();
 #elif defined(HW1_LOCKS)
 printf("inside locks\n");
 l->Acquire();
 #endif
-      val = SharedVariable;
-      printf("Thread %d sees final value %d\n", which, val);
+	val = SharedVariable;
+printf("Thread %d sees final value %d\n", which, val);
 #if defined(HW1_SEMAPHORES)
 s->V();
 #elif defined(HW1_LOCKS)
@@ -108,6 +131,7 @@ void
 ThreadTest(int n)
 {
 	#if defined(CHANGED) && defined(THREADS) && defined(HW1_SEMAPHORES)
+ 	number=n;
   	s = new Semaphore("test",1);  
 	#elif defined(CHANGED) && defined(THREADS) && defined(HW1_LOCKS)
 	l = new Lock("test");
