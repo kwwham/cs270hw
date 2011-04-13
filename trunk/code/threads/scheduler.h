@@ -34,7 +34,7 @@ class Scheduler {
 #if defined(HW1_COST)
 private:
 long timeElapsed;
-int numberOfSwitch;
+long numberOfSwitch;
 public:
 double getEverageTime();
 #endif

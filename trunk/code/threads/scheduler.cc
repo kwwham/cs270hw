@@ -96,10 +96,6 @@ Scheduler::FindNextToRun ()
 void
 Scheduler::Run (Thread *nextThread)
 {
-#if defined(HW1_COST)
-    struct timeval start, end;
-    gettimeofday(&start, NULL);
-#endif
     Thread *oldThread = currentThread;
     
 #ifdef USER_PROGRAM			// ignore until running user programs 
@@ -123,7 +119,19 @@ Scheduler::Run (Thread *nextThread)
     // a bit to figure out what happens after this, both from the point
     // of view of the thread and from the perspective of the "outside world".
 
+#if defined(HW1_COST)
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+#endif
+
     SWITCH(oldThread, nextThread);
+
+#ifdef HW1_COST
+    gettimeofday(&end, NULL);
+    printf("time elpased for thread: %d\n", ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec)));
+    timeElapsed += ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
+    numberOfSwitch++;
+#endif
     
     DEBUG('t', "Now in thread \"%s\"\n", currentThread->getName());
 
@@ -143,16 +151,11 @@ Scheduler::Run (Thread *nextThread)
     }
 #endif
 
-#ifdef HW1_COST
-    gettimeofday(&end, NULL);
-    timeElapsed += ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
-    numberOfSwitch++;
-#endif
 }
 #ifdef HW1_COST
 double Scheduler::getEverageTime()
 {
-     return timeElapsed/numberOfSwitch;
+     return (double)timeElapsed/numberOfSwitch;
 }
 #endif
 
