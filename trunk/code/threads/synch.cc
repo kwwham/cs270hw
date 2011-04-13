@@ -108,12 +108,12 @@ Semaphore::V()
  *
  *
  */
-#ifdef HW1_LOCKS
+
 Lock::Lock(char* debugName) 
 {
 	name = debugName;
 	queue = new List;
-	value = 1;
+	lockTaken = false;
 }
 Lock::~Lock() 
 {
@@ -123,43 +123,46 @@ void Lock::Acquire()
 {
 	IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts - why do we need?
 	
-	while(isHeldByCurrentThread())
+	while(!isHeldByCurrentThread() && lockTaken)
 	{
-		queue->append((void *)currentThread);
-		currentThread->sleep();
+		queue->Append((void *)currentThread);
+		currentThread->Sleep();
 	}
-	value--;
+	lockTaken = true;
+	currentTh = currentThread;
 	
 	(void) interrupt->SetLevel(oldLevel);	// re-enable interrupts - do we need these?
 }
 void Lock::Release() 
 {
+    if(!isHeldByCurrentThread())
+	return;
+
     Thread *thread;
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
 	
     thread = (Thread *)queue->Remove();
     if (thread != NULL)
 		scheduler->ReadyToRun(thread);
-    value++;
+    lockTaken=false;
     (void) interrupt->SetLevel(oldLevel);	
 }
 
-bool isHeldByCurrentThread()
+bool Lock::isHeldByCurrentThread()
 {
-	return value==0;
+	return currentTh==currentThread;
 }
 
-#else
 
 // Dummy functions -- so we can compile our later assignments 
 // Note -- without a correct implementation of Condition::Wait(), 
 // the test case in the network assignment won't work!
+/*
 Lock::Lock(char* debugName) {}
 Lock::~Lock() {}
 void Lock::Acquire() {}
 void Lock::Release() {}
-#endif
-
+*/
 Condition::Condition(char* debugName) { }
 Condition::~Condition() { }
 void Condition::Wait(Lock* conditionLock) { ASSERT(FALSE); }

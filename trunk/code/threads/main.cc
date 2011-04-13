@@ -103,7 +103,7 @@ main(int argc, char **argv)
     ThreadTest();
 
 #if defined(HW1_COST)
-printf("everage time of switching: %f\n", scheduler->getEverageTime());    
+//printf("everage time of switching: %f\n", scheduler->getEverageTime());    
 #endif
 
 #endif

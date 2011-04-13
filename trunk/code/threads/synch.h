@@ -78,14 +78,12 @@ class Lock {
 					// Condition variable ops below.
 
   private:
-    char* name;				// for debugging
-
-#ifdef HW1_LOCKS	
+    char* name;				// for debugging	
 	
-	int value;
-	List* queue;
+    Thread* currentTh;
+    bool lockTaken;
+    List* queue;
 	
-#endif
     // plus some other stuff you'll need to define
 };
 
