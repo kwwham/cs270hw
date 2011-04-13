@@ -31,6 +31,14 @@ class Scheduler {
   private:
     List *readyList;  		// queue of threads that are ready to run,
 				// but not running
+#if defined(HW1_COST)
+private:
+long timeElapsed;
+int numberOfSwitch;
+public:
+double getEverageTime();
+#endif
+
 };
 
 #endif // SCHEDULER_H

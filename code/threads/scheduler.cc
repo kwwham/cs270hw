@@ -21,6 +21,8 @@
 #include "copyright.h"
 #include "scheduler.h"
 #include "system.h"
+#include <time.h>
+#include <sys/time.h>
 
 //----------------------------------------------------------------------
 // Scheduler::Scheduler
@@ -29,7 +31,11 @@
 
 Scheduler::Scheduler()
 { 
-    readyList = new List; 
+    readyList = new List;
+#if defined(HW1_COST)
+    long timeElapsed=0;
+    int numberOfSwitch=0;
+#endif 
 } 
 
 //----------------------------------------------------------------------
@@ -90,6 +96,10 @@ Scheduler::FindNextToRun ()
 void
 Scheduler::Run (Thread *nextThread)
 {
+#if defined(HW1_COST)
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+#endif
     Thread *oldThread = currentThread;
     
 #ifdef USER_PROGRAM			// ignore until running user programs 
@@ -132,7 +142,19 @@ Scheduler::Run (Thread *nextThread)
 	currentThread->space->RestoreState();
     }
 #endif
+
+#ifdef HW1_COST
+    gettimeofday(&end, NULL);
+    timeElapsed += ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
+    numberOfSwitch++;
+#endif
 }
+#ifdef HW1_COST
+double Scheduler::getEverageTime()
+{
+     return timeElapsed/numberOfSwitch;
+}
+#endif
 
 //----------------------------------------------------------------------
 // Scheduler::Print

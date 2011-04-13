@@ -23,17 +23,16 @@ int testnum = 1;
 //	"which" is simply a number identifying the thread, for debugging
 //	purposes.
 //----------------------------------------------------------------------
-int ThreadPool[20];
-int number;
+
 #if defined(CHANGED) && defined(THREADS)
-int SharedVariable;
-#if defined(HW1_SEMAPHORES)
-Semaphore *s;
-// Implementing barriers
+int SharedVariable ;
+
+int ThreadPool[512]; // testnum is the number of thread given by user. it is setup in main.cc (extern variable)
+// Implementing barriers - it is used by both HW1_SEMAPHORES and HW1_LOCKS, and maybe by (CHANGED and THREADS)
 int Wait()
 {
 	int counter=1;
-	for(int i=0;i<number;i++)
+	for(int i=0;i<testnum;i++)
 	{
 		if(ThreadPool[i]==0)
 		{
@@ -44,6 +43,9 @@ int Wait()
 	return counter;
 }
 //end of the function for barriers
+
+#if defined(HW1_SEMAPHORES)
+Semaphore *s;
 #elif defined(HW1_LOCKS)
 Lock *l;
 #endif
@@ -51,7 +53,7 @@ Lock *l;
 void
 SimpleThread(int which)
 {
-        int num, val ;
+   	int num, val ; 
 	
 	for(num = 0; num < 5; num++) 
         {
@@ -64,34 +66,39 @@ l->Acquire();
 	    printf("*** thread %d sees value %d\n", which, val);
 	    currentThread->Yield();
 	    SharedVariable = val+1;
+
 #if defined(HW1_SEMAPHORES)
 s->V();
 #elif defined(HW1_LOCKS)
 l->Release();
 #endif
+
 	    currentThread->Yield();
 	}
 
-	//printf("outside define\n");
-	#if defined(HW1_SEMAPHORES)
-	//printf("inside semaphore1\n");
-	ThreadPool[which]=1;
-        while(Wait()==0)
+	#if defined(HW1_SEMAPHORES) || defined(HW1_LOCKS)
+	ThreadPool[which]=1; 	// the current thread is out of loop
+        while(Wait()==0)	// and check the other threads
 	{
-	currentThread->Yield();
+		currentThread->Yield();
 	}
+	#endif
 
+#ifdef HW1_SEMAPHORES 
 s->P();
-#elif defined(HW1_LOCKS)
-printf("inside locks\n");
-l->Acquire();
+#elif defined(HW1_LOCKS)  
+l->Acquire();  
 #endif
 	val = SharedVariable;
-printf("Thread %d sees final value %d\n", which, val);
+	printf("Thread %d sees final value %d\n", which, val);
 #if defined(HW1_SEMAPHORES)
 s->V();
 #elif defined(HW1_LOCKS)
 l->Release();
+#endif
+	
+#if defined(HW1_COST)
+printf("everage time of switching: %f\n", scheduler->getEverageTime());    
 #endif
 }
 
@@ -131,7 +138,6 @@ void
 ThreadTest(int n)
 {
 	#if defined(CHANGED) && defined(THREADS) && defined(HW1_SEMAPHORES)
- 	number=n;
   	s = new Semaphore("test",1);  
 	#elif defined(CHANGED) && defined(THREADS) && defined(HW1_LOCKS)
 	l = new Lock("test");
