@@ -508,4 +508,76 @@ Cleaning up...
 *	TASK 3 - HW1_TASK3 
 *
 ***************************************************
+[ychoi01@csil code]$ ./threads/nachos -rs -q 3 
+Condition Test: thread 0 sees value 0
+Condition Test: thread 0 sees value 1
+Condition Test: thread 0 sees value 2
+Condition Test: thread 0 sees value 3
+Condition Test: thread 0 sees value 4
+Condition Test: thread 1 sees value 5
+Condition Test: thread 1 sees value 6
+Condition Test: thread 1 sees value 7
+Condition Test: thread 1 sees value 8
+Condition Test: thread 1 sees value 9
+Condition Test: thread 2 sees value 10
+Condition Test: thread 2 sees value 11
+Condition Test: thread 2 sees value 12
+Condition Test: thread 2 sees value 13
+Condition Test: thread 2 sees value 14
+Condition Test: thread 2 sees final value 15
+Condition Test: thread 3 sees value 15
+Condition Test: thread 3 sees value 16
+Condition Test: thread 3 sees value 17
+Condition Test: thread 3 sees value 18
+Condition Test: thread 3 sees value 19
+Condition Test: thread 3 sees final value 20
+Condition Test: thread 4 sees value 20
+Condition Test: thread 4 sees value 21
+Condition Test: thread 4 sees value 22
+Condition Test: thread 4 sees value 23
+Condition Test: thread 4 sees value 24
+Condition Test: thread 4 sees final value 25
+Condition Test: thread 5 sees value 25
+Condition Test: thread 5 sees value 26
+Condition Test: thread 5 sees value 27
+Condition Test: thread 5 sees value 28
+Condition Test: thread 5 sees value 29
+Condition Test: thread 5 sees final value 30
+Condition Test: thread 6 sees value 30
+Condition Test: thread 6 sees value 31
+Condition Test: thread 6 sees value 32
+Condition Test: thread 6 sees value 33
+Condition Test: thread 6 sees value 34
+Condition Test: thread 6 sees final value 35
+Condition Test: thread 8 sees value 35
+Condition Test: thread 8 sees value 36
+Condition Test: thread 8 sees value 37
+Condition Test: thread 8 sees value 38
+Condition Test: thread 8 sees value 39
+Condition Test: thread 8 sees final value 40
+Condition Test: thread 9 sees value 40
+Condition Test: thread 9 sees value 41
+Condition Test: thread 9 sees value 42
+Condition Test: thread 9 sees value 43
+Condition Test: thread 9 sees value 44
+Condition Test: thread 9 sees final value 45
+Condition Test: thread 0 sees final value 45
+Condition Test: thread 1 sees final value 45
+Condition Test: thread 7 sees value 45
+Condition Test: thread 7 sees value 46
+Condition Test: thread 7 sees value 47
+Condition Test: thread 7 sees value 48
+Condition Test: thread 7 sees value 49
+Condition Test: thread 7 sees final value 50
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 277, idle 37, system 240, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
 
