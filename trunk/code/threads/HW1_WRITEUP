@@ -1,7 +1,26 @@
 CS270 HW1_WRITEUP
-Sujay Sundaram and Youngjoon Choi (ejoonie@gmail.com) 
+Sujay Sundaram(sujaysundaram@gmail.com) and Youngjoon Choi (ejoonie@gmail.com) 
+project status:
+For discussions we are available on: Tuesdays or on Thursdays after 1:00pm
+***************************************************
+*	Comment for TASK 1
+**************************************************
+For this task we have implemented synchornization using SEMAPHORES so that all the threads see the same final value when they finish. We have also implemented barrier function where all the threads in a perticular iteraton will enter a function wait() and wait for all the other threads to complete by this even when random interruputs are enabled, all the threads see the same final value.
 
+The function Wait() is implemented in threadtest.cc
 
+***************************************************
+*	Comment for task 2 and 3
+***************************************************
+For this task we have implemented Locks for mutual exclusion between threads. All the missing functions for locks have been implemented along with a function isHeldByCurrentthread() to check if the current thread holds the lock or not. 
+
+For the task 3, We have implemented all the condition operations and the test case to verify whether conditions a re working correctly is defined in a preprocessor symbol HW1_TASK3 and the function name is ConditionTestMain() in threadtest.cc.
+
+Semaphore, Lock, and Condition are implemented in synch.cc
+***********************************************************************************************************************************************************************
+*
+*Output Results:
+*
 ***************************************************
 *
 *	TASK 1 - HW1_SEMAPHORES
@@ -309,16 +328,10 @@ Network I/O: packets received 0, sent 0
 
 Cleaning up...
 **************************************************
-*	Comment for TASK 1
-**************************************************
-
-
-
-
-
-***************************************************
 *
-*	TASK 2 - HW1_LOCKS
+*	TASK 2 - HW1_LOCKS *	TASK 2 - HW1_LOCKS 
+*
+***************************************************
 *
 ***************************************************
 
@@ -490,4 +503,9 @@ Paging: faults 0
 Network I/O: packets received 0, sent 0
 
 Cleaning up...
+***************************************************
+*
+*	TASK 3 - HW1_TASK3 
+*
+***************************************************
 
