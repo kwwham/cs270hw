@@ -10,8 +10,8 @@
 // of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
-#include "system.h"
-#include "synch.h"
+#include "system.h" 
+#include "synch.h" 
 
 // testnum is set in main.cc
 int testnum = 1;
@@ -24,17 +24,17 @@ int testnum = 1;
 //	purposes.
 //----------------------------------------------------------------------
 
-#if defined(CHANGED) && defined(THREADS)
+#if defined(CHANGED) && defined(THREADS) 
 int SharedVariable ;
 
-int ThreadPool[512]; // testnum is the number of thread given by user. it is setup in main.cc (extern variable)
-// Implementing barriers - it is used by both HW1_SEMAPHORES and HW1_LOCKS, and maybe by (CHANGED and THREADS)
+int ThreadPool[512]; 	// testnum is the number of thread given by user. it is setup in main.cc (extern variable)
+			// Implementing barriers - it is used by both HW1_SEMAPHORES and HW1_LOCKS, and maybe by (CHANGED and THREADS)
 int Wait()
 {
 	int counter=1;
 	for(int i=0;i<testnum;i++)
 	{
-		if(ThreadPool[i]==0)
+		if(ThreadPool[i]==0) 
 		{
 			counter=0;
 			break;
@@ -57,7 +57,7 @@ char dummy[8*1024];
 
 
 void
-SimpleThread(int which) 
+SimpleThread(int which)  
 {
    	int num, val;
 
@@ -107,8 +107,10 @@ s->P();
 #elif defined(HW1_LOCKS)  
 l->Acquire();  
 #endif
+
 	val = SharedVariable;
 	printf("Thread %d sees final value %d\n", which, val);
+
 #if defined(HW1_SEMAPHORES)
 s->V();
 #elif defined(HW1_LOCKS)
@@ -185,7 +187,7 @@ int Wait2()
 	int counter=1;
 	for(int i=0;i<testnum;i++)
 	{
-		if(ThreadPool2[i]==0)
+		if(ThreadPool2[i]==0) 
 		{
 			counter=0;
 			break;
