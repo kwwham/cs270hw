@@ -87,10 +87,8 @@ main(int argc, char **argv)
 
     DEBUG('t', "Entering main");
     (void) Initialize(argc, argv);
+ 
 
-//#ifdef HW1_TASK3
-ConditionTestMain();
-//#endif
     
 #ifdef THREADS
     for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
@@ -105,7 +103,12 @@ ConditionTestMain();
         break;
       }
     }
-    ThreadTest(); 
+
+#ifdef HW1_TASK3
+ConditionTestMain();
+#else
+ThreadTest();
+#endif 
 
 #if defined(HW1_COST)
 printf("everage time of switching: %f\n", scheduler->getEverageTime());    
@@ -145,7 +148,7 @@ printf("everage time of switching: %f\n", scheduler->getEverageTime());
 	    ASSERT(argc > 1);
 	    Print(*(argv + 1));
 	    argCount = 2;
-	} else if (!strcmp(*argv, "-r")) {	// remove Nachos file
+	} else if (!strcmp(*argv, "-r")) {	// remove Nachos file 
 	    ASSERT(argc > 1);
 	    fileSystem->Remove(*(argv + 1));
 	    argCount = 2;
@@ -153,7 +156,7 @@ printf("everage time of switching: %f\n", scheduler->getEverageTime());
             fileSystem->List();
 	} else if (!strcmp(*argv, "-D")) {	// print entire filesystem
             fileSystem->Print();
-	} else if (!strcmp(*argv, "-t")) {	// performance test
+	} else if (!strcmp(*argv, "-t")) {	// performance test 
             PerformanceTest();
 	}
 #endif // FILESYS
