@@ -162,10 +162,73 @@ Lock::Lock(char* debugName) {}
 Lock::~Lock() {}
 void Lock::Acquire() {}
 void Lock::Release() {}
-*/
+
 Condition::Condition(char* debugName) { }
 Condition::~Condition() { }
 void Condition::Wait(Lock* conditionLock) { ASSERT(FALSE); }
 void Condition::Signal(Lock* conditionLock) { }
 void Condition::Broadcast(Lock* conditionLock) { }
+*/
+
+Condition::Condition(char* debugName) {
+	name = debugName;
+	waiting_threads = 0;
+	queue = new List;
+}
+Condition::~Condition() {
+	delete queue;
+}
+
+void Condition::Wait(Lock* conditionLock) {
+	if (!conditionLock->isHeldByCurrentThread()) {
+		return;
+	}
+	
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
+    
+	queue->Append((void *)currentThread);
+	waiting_threads++;
+	conditionLock->Release();
+	currentThread->Sleep();
+	
+	(void) interrupt->SetLevel(oldLevel);	// re-enable interrupts
+
+	conditionLock->Acquire();
+}
+
+void Condition::Signal(Lock* conditionLock) {
+	if (!conditionLock->isHeldByCurrentThread()) {
+		return;
+	}
+	
+	if (waiting_threads > 0) {
+	    IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
+	    waiting_threads--;
+		Thread* thread = (Thread*)queue->Remove();
+		if (thread != NULL) {
+			scheduler->ReadyToRun(thread);
+		}
+		(void) interrupt->SetLevel(oldLevel);	// re-enable interrupts
+	}
+}
+
+void Condition::Broadcast(Lock* conditionLock) {
+	if (!conditionLock->isHeldByCurrentThread()) {
+		return;
+	}
+	
+	IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
+	
+	Thread* thread;
+
+	while (waiting_threads > 0) {
+	    waiting_threads--;
+		thread = (Thread*)queue->Remove();
+		if (thread != NULL) {
+			scheduler->ReadyToRun(thread);
+		}
+	}
+	
+	(void) interrupt->SetLevel(oldLevel);	// re-enable interrupts
+}
 
