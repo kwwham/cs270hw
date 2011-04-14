@@ -178,23 +178,51 @@ ThreadTest(int n)
 Condition 	*condition;
 Lock 		*lock;
 int SharedVariable2=0;
+int ThreadPool2[500];
+
+int Wait2()
+{
+	int counter=1;
+	for(int i=0;i<testnum;i++)
+	{
+		if(ThreadPool2[i]==0)
+		{
+			counter=0;
+			break;
+		}
+	}
+	return counter;
+}
+
 void OtherThreads(int which) 
 {
 	int val;
 
 	for(int i=0;i<5;i++)
 	{
+condition->Wait(lock);
 	    val = SharedVariable2;
-	    printf("^^^^^ Other thread %d sees value %d\n", which, val);
-	    currentThread->Yield();
+	    printf("Condition Test: thread %d sees value %d\n", which, val);
 	    SharedVariable2 = val+1;	    
-	    currentThread->Yield();
+condition->Signal(lock);
 	}
+
+
+
+	ThreadPool2[which]=1; 	// the current thread is out of loop
+        while(Wait2()==0)	// and check the other threads
+	{
+		currentThread->Yield();
+	}
+
+condition->Wait(lock);
 	val = SharedVariable2;
-	printf("^^Other thread %d sees final value %d\n", which, val);
+	printf("Condition Test: thread %d sees final value %d\n", which, val);
+condition->Signal(lock);
         
 }
-void LeadingThread()
+
+void LeadingThread(int dummy)
 {
 	int val;
 	for(int i=0;i<100;i++)
@@ -203,8 +231,10 @@ condition->Wait(lock);
 	    val = SharedVariable2;
 	    printf("^^^^^ Leading thread sees value %d\n", val);
 	    currentThread->Yield();
-	    SharedVariable2 = val+1;	    
+	    SharedVariable2 = val+1;
+condition->Signal(lock);	    
 	    currentThread->Yield();
+	}
 		
 }
 
@@ -214,15 +244,20 @@ void ConditionTestMain()
 
 	const int NUM = 10;
 	Thread *ts[NUM];
+	Thread *leadingThread = new Thread("leading Thread");
 
 	condition = new Condition("my condition");
 	lock = new Lock("myLock");
+
 	
 	for(int i=0;i<NUM;i++)
 	{
 		ts[i] = new Thread("forked thread"); 
 		ts[i]->Fork(OtherThreads, i); 				
 	}
+
+	//leadingThread->Fork(LeadingThread,1);
+
 }
 
 
