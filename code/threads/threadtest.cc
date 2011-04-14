@@ -172,6 +172,30 @@ ThreadTest(int n)
 	
 }
 
+void ConditionTest()
+{
+	const int NUM = 100;
+	Thread *ts[NUM];
+
+	Condition *condition = new Condition("my condition");
+	Lock *lock = new Lock("myLock");
+	
+	for(int i=0;i<NUM;i++)
+	{
+		ts[i] = new Thread("forked thread"); 
+		ts[i]->Fork(SimpleThread2, i); 				
+	}
+}
+
+void SimpleThread2(int which)
+{
+	for(int i=0;i<10;i++)
+	{
+		printf("%d is running\n",which);
+	}
+	
+}
+
 
 
 //----------------------------------------------------------------------
