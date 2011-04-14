@@ -63,6 +63,7 @@ extern void ThreadTest(void), Copy(char *unixFile, char *nachosFile);
 extern void Print(char *file), PerformanceTest(void);
 extern void StartProcess(char *file), ConsoleTest(char *in, char *out);
 extern void MailTest(int networkID);
+extern void ConditionTestMain();
 
 //----------------------------------------------------------------------
 // main
@@ -86,6 +87,10 @@ main(int argc, char **argv)
 
     DEBUG('t', "Entering main");
     (void) Initialize(argc, argv);
+
+//#ifdef HW1_TASK3
+ConditionTestMain();
+//#endif
     
 #ifdef THREADS
     for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
@@ -100,10 +105,10 @@ main(int argc, char **argv)
         break;
       }
     }
-    ThreadTest();
+    ThreadTest(); 
 
 #if defined(HW1_COST)
-//printf("everage time of switching: %f\n", scheduler->getEverageTime());    
+printf("everage time of switching: %f\n", scheduler->getEverageTime());    
 #endif
 
 #endif
