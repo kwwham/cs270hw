@@ -171,30 +171,60 @@ ThreadTest(int n)
 
 	
 }
-
-void ConditionTest()
+//--------------------------------------------------------------
+// Condition Test
+//
+//--------------------------------------------------------------
+Condition 	*condition;
+Lock 		*lock;
+int SharedVariable2=0;
+void OtherThreads(int which) 
 {
-	const int NUM = 100;
+	int val;
+
+	for(int i=0;i<5;i++)
+	{
+	    val = SharedVariable2;
+	    printf("^^^^^ Other thread %d sees value %d\n", which, val);
+	    currentThread->Yield();
+	    SharedVariable2 = val+1;	    
+	    currentThread->Yield();
+	}
+	val = SharedVariable2;
+	printf("^^Other thread %d sees final value %d\n", which, val);
+        
+}
+void LeadingThread()
+{
+	int val;
+	for(int i=0;i<100;i++)
+	{
+condition->Wait(lock);
+	    val = SharedVariable2;
+	    printf("^^^^^ Leading thread sees value %d\n", val);
+	    currentThread->Yield();
+	    SharedVariable2 = val+1;	    
+	    currentThread->Yield();
+		
+}
+
+void ConditionTestMain()
+{
+	DEBUG('t', "Entering ConditionTestMain");
+
+	const int NUM = 10;
 	Thread *ts[NUM];
 
-	Condition *condition = new Condition("my condition");
-	Lock *lock = new Lock("myLock");
+	condition = new Condition("my condition");
+	lock = new Lock("myLock");
 	
 	for(int i=0;i<NUM;i++)
 	{
 		ts[i] = new Thread("forked thread"); 
-		ts[i]->Fork(SimpleThread2, i); 				
+		ts[i]->Fork(OtherThreads, i); 				
 	}
 }
 
-void SimpleThread2(int which)
-{
-	for(int i=0;i<10;i++)
-	{
-		printf("%d is running\n",which);
-	}
-	
-}
 
 
 

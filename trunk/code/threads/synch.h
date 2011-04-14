@@ -137,6 +137,8 @@ class Condition {
   private:
     char* name;
     // plus some other stuff you'll need to define
+    int waiting_threads;
+    List *queue;
 };
 #endif // SYNCH_H
 
