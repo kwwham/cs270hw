@@ -36,7 +36,7 @@ private:
 long timeElapsed;
 long numberOfSwitch;
 public:
-double getEverageTime();
+double getAverageTime();
 #endif
 
 };

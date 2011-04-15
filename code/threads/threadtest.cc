@@ -12,6 +12,8 @@
 #include "copyright.h"
 #include "system.h" 
 #include "synch.h" 
+#include <time.h>
+#include <sys/time.h>
 
 // testnum is set in main.cc
 int testnum = 1;
@@ -50,34 +52,17 @@ Semaphore *s;
 Lock *l;
 #endif
 
-
-#ifdef HW1_COST
-char dummy[8*1024];
-#endif
-
-
 void
 SimpleThread(int which)  
 {
    	int num, val;
 
-#ifdef HW1_COST
-//char dummy[8*1024*1024];
-int indexForDummy = which*10;
-char c;
-#endif
- 
-	
 	for(num = 0; num < 5; num++) 
         {
 #if defined(HW1_SEMAPHORES)
 s->P();
 #elif defined(HW1_LOCKS)
 l->Acquire();
-#endif
-
-#ifdef HW1_COST
-c = dummy[indexForDummy++];
 #endif
 
 	    val = SharedVariable;
@@ -173,6 +158,71 @@ ThreadTest(int n)
 
 	
 }
+
+//--------------------------------------------------------------
+//
+// SimpleTest function for the cost of thread switching HW1_COST
+//
+//--------------------------------------------------------------
+int memorysize;
+int numOfThreads;
+int numOfThreadsFinished;
+long totalElapsedTime;
+Lock *l2;
+
+void 
+SimpleThreadCost(int i)
+{
+	long elapsedTime;
+	struct timeval start, end;
+	gettimeofday(&start, NULL);
+	
+	char *dummy = new char(memorysize);
+	char c;
+	
+	// it simply reads the memory
+	for(int i=0;i<memorysize;i++)
+		c = dummy[i];
+	
+	
+
+	delete dummy;
+	
+	gettimeofday(&end, NULL);
+	l2->Acquire();
+	totalElapsedTime += ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
+	numOfThreadsFinished++;
+	l2->Release();
+}
+double 
+CostTest(int num, int memsize)
+{
+	numOfThreads = num;
+	memorysize = memsize;
+	totalElapsedTime = 0;
+	numOfThreadsFinished = 0;
+ 	l2 = new Lock("Lock for cost");
+
+	Thread *ts[num];
+	
+	for(int i=1;i<num;i++)
+	{
+		ts[i] = new Thread("thread for cost"); 
+		ts[i]->Fork(SimpleThreadCost, i); 				
+	}
+	while(numOfThreadsFinished != numOfThreads)
+		currentThread->Yield();
+
+	return (double)totalElapsedTime/numOfThreads;
+
+} 
+
+//--------------------------------------------------------------
+// End of the SimpleTest for HW1_COST
+//--------------------------------------------------------------
+
+
+
 //--------------------------------------------------------------
 // Condition Test
 //
