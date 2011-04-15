@@ -153,7 +153,7 @@ Scheduler::Run (Thread *nextThread)
 
 }
 #ifdef HW1_COST
-double Scheduler::getEverageTime()
+double Scheduler::getAverageTime() 
 {
      return (double)timeElapsed/numberOfSwitch;
 }
