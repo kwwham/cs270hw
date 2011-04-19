@@ -114,9 +114,9 @@ ThreadTest();
 #if defined(HW1_COST)
 printf("everage time of switching: %f\n", scheduler->getAverageTime());
 printf("10 Threads with 256KB Memory: %f\n", CostTest(10, 256*1024));
-//printf("1000 Threads with 256KB Memory: %f\n", CostTest(1000, 256*1024));
-//printf("10 Threads with 8MB Memory: %f\n", CostTest(10, 8*1024*1024));
-//printf("1000 Threads with 8MB Memory: %f\n", CostTest(1000, 8*1024*1024));    
+printf("1000 Threads with 256KB Memory: %f\n", CostTest(1000, 256*1024));
+printf("10 Threads with 8MB Memory: %f\n", CostTest(10, 8*1024*1024));
+printf("1000 Threads with 8MB Memory: %f\n", CostTest(1000, 8*1024*1024));    
 #endif
 
 #endif

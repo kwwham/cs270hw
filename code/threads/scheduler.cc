@@ -128,7 +128,7 @@ Scheduler::Run (Thread *nextThread)
 
 #ifdef HW1_COST 
     gettimeofday(&end, NULL);
-    printf("time elpased for thread: %d\n", ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec)));
+    //printf("time elpased for thread: %d\n", ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec)));
     timeElapsed += ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
     numberOfSwitch++;
 #endif
