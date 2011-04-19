@@ -1,6 +1,6 @@
 CS270 HW1_WRITEUP
-Sujay Sundaram(sujaysundaram@gmail.com) and Youngjoon Choi (ejoonie@gmail.com) 
-project status:
+Youngjoon Choi (ejoonie@gmail.com) and Sujay Sundaram(sujaysundaram@gmail.com)
+project status: 100% complete
 For discussions we are available on: Tuesdays or on Thursdays after 1:00pm
 ***************************************************
 *	Comment for TASK 1
@@ -14,14 +14,51 @@ The function Wait() is implemented in threadtest.cc
 ***************************************************
 For this task we have implemented Locks for mutual exclusion between threads. All the missing functions for locks have been implemented along with a function isHeldByCurrentthread() to check if the current thread holds the lock or not. 
 
-For the task 3, We have implemented all the condition operations and the test case to verify whether conditions a re working correctly is defined in a preprocessor symbol HW1_TASK3 and the function name is ConditionTestMain() in threadtest.cc.
+For the task 3, We have implemented all the condition operations along with the test case to verify whether conditions are working correctly or not.A preprocessor symbol HW1_TASK3 is used for this task and the function name that we have implemented is called ConditionTestMain() which is in threadtest.cc.
 
 Semaphore, Lock, and Condition are implemented in synch.cc
-***********************************************************************************************************************************************************************
-*
-*Output Results:
-*
 ***************************************************
+*       Comment for task 4
+***************************************************
+For this task we have placed the code that checks the start time and the end time around the SWITCH(oldThread,nextThread) in the scheduler.cc file to measure the average time taken to perform the context switch. We measure time with different number of threads. We observed the data as follows:
+
+for 2 threads: time = 2 microsec
+for 10 threads: time= 54 microsec
+for 100 threads: time = 327 microsec
+for 1000 threads: time= 464 microsec
+
+We observed that the average time increase as we have larger number of threads. We think that this is because when context switching happens the nacho saves the data from the registers into memory.Therefore the larger number of threads leads the bigger cache miss rate which will increase the average context switch time.
+
+
+We have also measured the average runtime for each thread by changing the number of threads and the memorysize. Here are some of the observations (in microseconds):
+
+1 Threads with 128KB Memory: 489.000000
+2 Threads with 128KB Memory: 411.500000
+10 Threads with 128KB Memory: 384.000000
+1000 Threads with 128KB Memory: 385.906000
+
+1 Threads with 256KB Memory: 893.000000
+2 Threads with 256KB Memory: 812.500000
+10 Threads with 256KB Memory: 759.600000
+1000 Threads with 256KB Memory: 754.702000
+
+1 Threads with 8MB Memory: 27370.000000
+2 Threads with 8MB Memory: 27078.000000
+10 Threads with 8MB Memory: 27146.000000
+1000 Threads with 8MB Memory: 27112.330000
+
+1 Threads with 16MB Memory: 54203.000000
+2 Threads with 16MB Memory: 54145.500000
+10 Threads with 16MB Memory: 54561.800000
+1000 Threads with 16MB Memory: 54399.491000
+
+Each threads has its own character array in the heap space and reads each block one by one. The average run time increases as the size of the memory increases. It does not seem to change with the number of threads. Also consider the above observation, where we can see that for a perticular number of threads the run time doubles when we doubled the size of the memory. 
+
+**********************************************************************************************************************************************************************av
+*
+*						Output Results
+*
+*********************************************************************************************************************************************************************
 *
 *	TASK 1 - HW1_SEMAPHORES
 *
@@ -332,8 +369,6 @@ Cleaning up...
 *	TASK 2 - HW1_LOCKS *	TASK 2 - HW1_LOCKS 
 *
 ***************************************************
-*
-***************************************************
 
 [ychoi01@csil code]$ ./threads/nachos -rs 4 -q 0
 *** thread 0 sees value 0
@@ -580,4 +615,4 @@ Paging: faults 0
 Network I/O: packets received 0, sent 0
 
 Cleaning up...
-
+***************************************************
