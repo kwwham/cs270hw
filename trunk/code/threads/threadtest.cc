@@ -177,18 +177,20 @@ SimpleThreadCost(int i)
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
 	
-	char *dummy = new char(memorysize);
+	int size = memorysize;
+	char *dummy = new char[size];
 	char c;
 	
+	//printf("\nmemorysize: %d\n", memorysize);
+
 	// it simply reads the memory
-	for(int i=0;i<memorysize;i++)
+	for(int i=0;i<size;i++)
 		c = dummy[i];
 	
-	
-
 	delete dummy;
 	
 	gettimeofday(&end, NULL);
+
 	l2->Acquire();
 	totalElapsedTime += ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
 	numOfThreadsFinished++;
@@ -205,7 +207,7 @@ CostTest(int num, int memsize)
 
 	Thread *ts[num];
 	
-	for(int i=1;i<num;i++)
+	for(int i=0;i<num;i++)
 	{
 		ts[i] = new Thread("thread for cost"); 
 		ts[i]->Fork(SimpleThreadCost, i); 				
