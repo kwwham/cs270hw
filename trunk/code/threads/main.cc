@@ -1,6 +1,6 @@
 // main.cc 
 //	Bootstrap code to initialize the operating system kernel.
-//	This is the test. 
+//	This is the test. Test 2
 //	Allows direct calls into internal operating system functions,
 //	to simplify debugging and testing.  In practice, the
 //	bootstrap code would just initialize data structures,
