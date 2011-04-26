@@ -3,7 +3,7 @@
 //	that thread.
 //
 // 	These routines assume that interrupts are already disabled.
-//	If interrupts are disabled, we can assume mutual exclusion
+//	If interrupts are disabled, we can assume mutual exclusion 
 //	(since we are on a uniprocessor).
 //
 // 	NOTE: We can't use Locks to provide mutual exclusion here, since

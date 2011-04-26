@@ -8,7 +8,7 @@
 //
 // 	Most of this file is not needed until later assignments.
 //
-// Usage: nachos -d <debugflags> -rs <random seed #>
+// Usage: nachos -d <debugflags> -rs <random seed #> 
 //		-s -x <nachos file> -c <consoleIn> <consoleOut>
 //		-f -cp <unix file> <nachos file>
 //		-p <nachos file> -r <nachos file> -l -D -t
