@@ -11,10 +11,12 @@
  */
 
 #include "syscall.h"
+//#include <stdio.h>
 
 int
 main()
 {
+    //printf("halt joon !!\n");
     Halt();
     /* not reached */
 }
