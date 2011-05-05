@@ -176,7 +176,6 @@ SimpleThreadCost(int i)
 	long elapsedTime;
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
-	
 	int size = memorysize;
 	char *dummy = new char[size];
 	char c;

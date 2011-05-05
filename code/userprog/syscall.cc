@@ -1,3 +1,4 @@
+#include"syscall.h"
 /* Address space control operations: Exit, Exec, and Join */
 
 /* This user program is done (status = 0 means exited normally). */

@@ -16,6 +16,9 @@
 #include "copyright.h"
 #include "filesys.h"
 
+#include "PCB.h"
+
+#include "syscall.h"
 #define UserStackSize		1024 	// increase this as necessary!
 
 class AddrSpace {
@@ -30,6 +33,15 @@ class AddrSpace {
 
     void SaveState();			// Save/restore address space-specific
     void RestoreState();		// info on a context switch 
+
+	AddrSpace(TranslationEntry* table, int page_count, int oldPID);
+	PCB* pcb;
+/* Functions that we have included */
+
+	bool Translate(int vaddr, int* paddr, bool writing);
+	void SysCallDone();
+	int Clone(AddrSpace** copySpace);
+	int ReadFile(int vaddr, OpenFile* file, int size, int fileAddr);
 
   private:
     TranslationEntry *pageTable;	// Assume linear page table translation

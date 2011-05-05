@@ -16,7 +16,6 @@
 int
 main()
 {
-    //printf("halt joon !!\n");
     Halt();
     /* not reached */
 }

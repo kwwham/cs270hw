@@ -19,10 +19,12 @@
 #include "system.h"
 #include "addrspace.h"
 #include "noff.h"
+#include <iostream>
+#include <exception>
 #ifdef HOST_SPARC
 #include <strings.h>
 #endif
-
+extern void PageFaultHandler(int vaddr);
 //----------------------------------------------------------------------
 // SwapHeader
 // 	Do little endian to big endian conversion on the bytes in the 
@@ -62,9 +64,13 @@ SwapHeader (NoffHeader *noffH)
 
 AddrSpace::AddrSpace(OpenFile *executable)
 {
+/* Added For HW2*/
+	pcb = new PCB(pm->GetPID(), -1, NULL, -1);
+    pm->AddProcess(pcb);
+/* Ends here */
+
     NoffHeader noffH;
     unsigned int i, size;
-
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) && 
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
@@ -83,13 +89,27 @@ AddrSpace::AddrSpace(OpenFile *executable)
 						// at least until we have
 						// virtual memory
 
+/* Added For HW2*/
+	if (numPages > memory->freePages()) {
+        printf("Not enough memory to perform Exec!\n");
+        pm->ClearPID(pcb->GetPID());
+        //delete pcb;
+        throw std::bad_alloc();
+    }
+/* Ends here */
+
     DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
 					numPages, size);
 // first, set up the translation 
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
 	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	pageTable[i].physicalPage = i;
+/* Added for HW2 */
+
+	pageTable[i].physicalPage = memory->getPage();
+	// Previously it was ->  pageTable[i].physicalPage = i;
+
+/* Ends here */
 	pageTable[i].valid = TRUE;
 	pageTable[i].use = FALSE;
 	pageTable[i].dirty = FALSE;
@@ -106,16 +126,24 @@ AddrSpace::AddrSpace(OpenFile *executable)
     if (noffH.code.size > 0) {
         DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
 			noffH.code.virtualAddr, noffH.code.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
-			noffH.code.size, noffH.code.inFileAddr);
+/* Added for Hw2 */
+		ReadFile(noffH.code.virtualAddr, executable, noffH.code.size, noffH.code.inFileAddr);
+	
+      //  executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
+		//	noffH.code.size, noffH.code.inFileAddr);
+/* Ends here */
     }
     if (noffH.initData.size > 0) {
         DEBUG('a', "Initializing data segment, at 0x%x, size %d\n", 
 			noffH.initData.virtualAddr, noffH.initData.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
-			noffH.initData.size, noffH.initData.inFileAddr);
-    }
+/* Added for Hw2 */
+		ReadFile(noffH.initData.virtualAddr, executable, noffH.initData.size, noffH.initData.inFileAddr);
 
+//        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
+	//		noffH.initData.size, noffH.initData.inFileAddr);
+/* Ends here */
+    }
+	DEBUG('f', "Loaded program %d code | %d data | %d bss\n", noffH.code.size, noffH.initData.size, noffH.uninitData.size);
 }
 
 //----------------------------------------------------------------------
@@ -184,3 +212,125 @@ void AddrSpace::RestoreState()
     machine->pageTable = pageTable;
     machine->pageTableSize = numPages;
 }
+
+//----------------------------------------------------------------
+// 			My functions are added here
+//-------------------------------------------------------------------
+
+
+bool AddrSpace::Translate(int vaddr, int* paddr, bool writing) {
+   if (paddr == NULL) {
+      // THROW AN ERROR
+   }
+
+   int vpn = vaddr / PageSize;
+   int offset = vaddr % PageSize;
+
+   if (vpn > numPages) {
+      return FALSE;
+   }
+   else if (!pageTable[vpn].valid) {
+      return FALSE;
+   }
+
+   int phys_page = pageTable[vpn].physicalPage;
+   int phys_addr = (phys_page * PageSize) + offset;
+
+   *paddr = phys_addr;
+
+   if (writing) {
+      pageTable[vpn].dirty = TRUE;
+   }
+
+   #ifdef VM
+   pageTable[vpn].use = TRUE;
+   #endif
+
+   return TRUE;
+}
+
+
+void AddrSpace::SysCallDone() {
+    for (int i = 0; i < numPages; i++) {
+        pageTable[i].use = FALSE;
+    }
+}
+
+int AddrSpace::Clone(AddrSpace** copySpace) {
+    AddrSpace* newspace;
+
+
+    if (memory->freePages() < numPages) {
+        printf("Not enough free memory to fork!\n");
+        *copySpace == NULL;
+        return 0;
+    }
+
+    TranslationEntry* newTable = new TranslationEntry[numPages];
+
+    for (int i = 0; i < numPages; i++) {
+        newTable[i].virtualPage = pageTable[i].virtualPage;
+        newTable[i].physicalPage = memory->getPage();
+
+        memcpy((void*) machine->mainMemory + (newTable[i].physicalPage * PageSize), (void*) machine->mainMemory + (pageTable[i].physicalPage * PageSize), PageSize);
+
+        newTable[i].valid = pageTable[i].valid;
+        newTable[i].use = pageTable[i].use;
+        newTable[i].dirty = pageTable[i].dirty;
+        newTable[i].readOnly = pageTable[i].readOnly;
+    }
+
+    *copySpace = new AddrSpace(newTable, numPages, pcb->GetPID());
+
+    return numPages;
+}
+
+AddrSpace::AddrSpace(TranslationEntry* table, int page_count, int oldPID) {
+    pageTable = table;
+    numPages = page_count;
+
+    pcb = new PCB(pm->GetPID(), -1, NULL, -1);
+    pm->AddProcess(pcb);
+
+}
+
+
+int AddrSpace::ReadFile(int vaddr, OpenFile* file, int size, int fileAddr) {
+   int bytes_read = 0;
+   int bytes_wrote;
+   int phys_addr;
+   int write_size;
+   char* mem_buffer;
+
+   //DEBUG('m', "--------------------Start vaddr: %d end vaddr: %d\n", vaddr, vaddr + size);
+
+   while (bytes_read < size) {
+      //int read = file->ReadAt(diskBuffer, PageSize, fileAddr);
+      int read = file->ReadAt(diskBuffer, PageSize - (vaddr % PageSize), fileAddr);
+      fileAddr += read;
+      //DEBUG('m', "Bytes read: %d\n", read);
+      bytes_read += read;
+      bytes_wrote = 0;
+      mem_buffer = diskBuffer;
+
+      while (bytes_wrote < read) {
+         //DEBUG('m', "Bytes wrote: %d\n", bytes_wrote);
+         write_size = PageSize - (vaddr % PageSize);
+         bytes_wrote += write_size;
+
+         if (!Translate(vaddr, &phys_addr, false)) {
+            // THROW AN ERROR
+            DEBUG('p', "Translation Failed! Should throw an Exception?\n");
+         }
+
+         DEBUG('m', "Phys addr: %d of size: %d\n", phys_addr, write_size);
+         DEBUG('a', "Writing to physical memory page %d\n", phys_addr/ PageSize);
+         memcpy(machine->mainMemory + phys_addr, mem_buffer, write_size);
+         mem_buffer += write_size;
+         //DEBUG('m', "Virtual address location: %d\n", vaddr);
+         vaddr = vaddr + write_size;
+      }
+   }
+}
+
+
