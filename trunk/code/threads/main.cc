@@ -52,6 +52,8 @@
 
 #include "utility.h"
 #include "system.h"
+// Our addition to test for the user program
+//#include "syscall.h"
 
 #ifdef THREADS
 extern int testnum;
@@ -117,7 +119,6 @@ printf("1 Threads with 128KB Memory: %f\n", CostTest(1, 128*1024));
 printf("2 Threads with 128KB Memory: %f\n", CostTest(2, 128*1024));
 printf("10 Threads with 128KB Memory: %f\n", CostTest(10, 128*1024));
 printf("1000 Threads with 128KB Memory: %f\n", CostTest(1000, 128*1024));
-
 printf("1 Threads with 256KB Memory: %f\n", CostTest(1, 256*1024));
 printf("2 Threads with 256KB Memory: %f\n", CostTest(2, 256*1024));
 printf("10 Threads with 256KB Memory: %f\n", CostTest(10, 256*1024));
@@ -126,11 +127,10 @@ printf("1 Threads with 8MB Memory: %f\n", CostTest(1, 8*1024*1024));
 printf("2 Threads with 8MB Memory: %f\n", CostTest(2, 8*1024*1024));
 printf("10 Threads with 8MB Memory: %f\n", CostTest(10, 8*1024*1024));
 printf("1000 Threads with 8MB Memory: %f\n", CostTest(1000, 8*1024*1024));     
-
 printf("1 Threads with 16MB Memory: %f\n", CostTest(1, 16*1024*1024));
 printf("2 Threads with 16MB Memory: %f\n", CostTest(2, 16*1024*1024));
 printf("10 Threads with 16MB Memory: %f\n", CostTest(10, 16*1024*1024));
-printf("1000 Threads with 16MB Memory: %f\n", CostTest(1000, 16*1024*1024));     
+printf("1000 Threads with 16MB Memory: %f\n", CostTest(1000, 16*1024*1024)); 
 
 #endif
 
@@ -142,7 +142,7 @@ printf("1000 Threads with 16MB Memory: %f\n", CostTest(1000, 16*1024*1024));
             printf (copyright);
 #ifdef USER_PROGRAM 
 //- userprog/nachos -x binarycode
-	printf("user program, joon!!\n");
+	printf("Entering main.cc\n");
         if (!strcmp(*argv, "-x")) {        	// run a user program
 	    ASSERT(argc > 1);
             StartProcess(*(argv + 1));

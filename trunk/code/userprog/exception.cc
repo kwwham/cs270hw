@@ -24,6 +24,10 @@
 #include "copyright.h"
 #include "system.h"
 #include "syscall.h"
+#include <string.h>
+#include <exception>
+#include <iostream>
+#include <stdio.h>
 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -47,17 +51,415 @@
 //	"which" is the kind of exception.  The list of possible exceptions 
 //	are in machine.h.
 //----------------------------------------------------------------------
+void forkbridge(int func) {
+        currentThread->space->InitRegisters();
+        currentThread->space->RestoreState();
+
+        machine->registers[PCReg] = func; // Start running from this func
+        machine->registers[NextPCReg] = func + 4;
+        machine->registers[RetAddrReg] += 8;
+
+        machine->Run();
+}
+/*
+USING PROCESSCREATOR INSTEAD OF THIS FUNCTION
+
+void execdummy(int ignore) {
+        currentThread->space->InitRegisters();
+        currentThread->space->RestoreState();
+
+        machine->Run();
+} */
+
+// Read or write from main memory
+// 0 = Read, 1 = Write
+int userReadWrite(int vaddr, char* buffer, int size, int type)
+{
+   
+     int bytes_read = 0;
+        int bytes_wrote;
+        int phys_addr;
+        int write_size;
+        int read_size;
+        char* mem_buffer;
+        char* buffer_buffer;
+
+        // Read from buffer into memory
+        if (type == 0) {
+                while (bytes_read < size) {
+                        //int read = file->ReadAt(diskBuffer, PageSize, fileAddr);
+                        int read = 0;
+                        if ((size - bytes_read) >= PageSize) {
+                                db_lock->Acquire();
+                                memcpy(diskBuffer, buffer + bytes_read, PageSize);
+                                db_lock->Release();
+                                read = PageSize;
+                        }
+                        else {
+                                db_lock->Acquire();
+                                memcpy(diskBuffer, buffer + bytes_read, size - bytes_read);
+                                db_lock->Release();
+                                read = size - bytes_read;
+                        }
+                        //fileAddr += read;
+                        bytes_read += read;
+                        bytes_wrote = 0;
+                        mem_buffer = diskBuffer;
+						while (bytes_wrote < read) {
+                                //write_size = PageSize - (vaddr % PageSize);
+                                //write_size = size;
+                                if (size > (PageSize - (vaddr % PageSize))) {
+                                        write_size = PageSize - (vaddr % PageSize);
+                                }
+                                else {
+                                        write_size = size;
+                                }
+
+                                bytes_wrote += write_size;
+
+                                if (!currentThread->space->Translate(vaddr, &phys_addr, true)) {
+                                        // THROW AN ERROR
+                                }
+
+                                //DEBUG('f', "Buffer value...%s\n", machine->mainMemory + phys_addr);
+                                db_lock->Acquire();
+                                memcpy(machine->mainMemory + phys_addr, mem_buffer, write_size);
+                                db_lock->Release();
+                                mem_buffer += write_size;
+                                vaddr = vaddr + write_size;
+                        }
+                }
+        }
+
+        // Write from memory into a buffer
+        if (type == 1) {
+                buffer_buffer = buffer;
+
+                while (bytes_read < size) {
+                        //int read = file->ReadAt(diskBuffer, PageSize, fileAddr);
+                        int read = 0;
+
+                        //read_size = PageSize - (vaddr % PageSize);
+                        //read_size = size;
+						 if (size > (PageSize - (vaddr % PageSize))) {
+                                read_size = PageSize - (vaddr % PageSize);
+                        }
+                        else {
+                                read_size = size;
+                        }
+
+                        if (!currentThread->space->Translate(vaddr, &phys_addr, false)) {
+                                // THROW AN ERROR
+                        }
+
+                        if (read_size > (size - bytes_read)) {
+                                read_size = size - bytes_read;
+                        }
+
+                        if (read_size > PageSize) {
+                                read_size = PageSize;
+                        }
+
+                        db_lock->Acquire();
+                        memcpy(diskBuffer, machine->mainMemory + phys_addr, read_size);
+                        db_lock->Release();
+                        vaddr = vaddr + read_size;
+
+                        //fileAddr += read;
+                        bytes_read += read_size;
+                        bytes_wrote = 0;
+                        //mem_buffer = diskBuffer;
+
+                        //while (bytes_wrote < read_size) {
+                        db_lock->Acquire();
+                        memcpy(buffer_buffer, diskBuffer, read_size);
+                        db_lock->Release();
+
+                        buffer_buffer += read_size;
+                        //}
+                }
+        }
+
+}
+
+SpaceId MyFork(int arg)
+{
+	
+    AddrSpace *space, *copyspace;
+    Thread *newthread;
+
+    space = currentThread->space;
+    int pages = space->Clone(&copyspace);
+
+    if (pages == 0) {
+            DEBUG('f', "Error!\n");
+            return -1;
+    }
+
+    newthread = new Thread("new forked thread");
+    newthread->space = copyspace;
+
+    newthread->space->pcb->SetThread(newthread);
+    newthread->space->pcb->SetParentPID(currentThread->space->pcb->GetPID());
+
+    newthread->Fork(forkbridge, arg);
+    //printf("%s with SpaceId %d has been forked!!\n", newthread->getName(), copyspace->spaceId);
+    DEBUG('2', "Process %d Fork: start at address 0x%X with %d pages memory\n", currentThread->space->pcb->GetPID(), arg, pages);
+    currentThread->Yield();
+
+    return newthread->space->pcb->GetPID(); // was -1
+
+}
+
+void Yield() 
+{
+        currentThread->Yield();
+}
+
+
+void ExitProcess(int status)
+{	
+/* should Include code here ... this is a dummy function */
+	currentThread->Finish();
+
+
+}
+void GetFileName(int vaddr, char** ptr) {
+        int paddr;
+
+        currentThread->space->Translate(vaddr, &paddr, false);
+
+        char* name = new char[strlen(machine->mainMemory + paddr) + 1];
+        strcpy(name, machine->mainMemory + paddr);
+        *ptr = name;
+}
+
+
+void processCreator(int arg)
+{
+	currentThread->space->InitRegisters();		// set the initial register values
+    currentThread->space->RestoreState();		// load page table register
+
+    machine->Run();			// jump to the user progam
+	//ASSERT(FALSE);
+}
+
+
+SpaceId Exec(int vaddr) 
+{
+	char* name;
+    int paddr; 
+    currentThread->space->Translate(vaddr, &paddr, false);
+    name = new char[strlen(machine->mainMemory + paddr) + 1];
+    strcpy(name, machine->mainMemory + paddr);
+    OpenFile *executable = fileSystem->Open(name);
+	AddrSpace *space;
+	if (executable == NULL) 
+	{
+        printf("Unable to open file %s\n", name);
+        return -1;
+    }
+    try 
+	{
+		space = new AddrSpace(executable);
+    }
+    catch (std::bad_alloc&) 
+	{
+        delete name;
+        return NULL;
+  	}	
+	Thread* newthread =new Thread("New Exec thread");
+    newthread->space = space;
+	newthread->space->pcb->SetThread(newthread);
+    newthread->space->pcb->SetParentPID(currentThread->space->pcb->GetPID());
+	newthread->Fork(processCreator, 0);
+    delete executable;
+    DEBUG('2', "Exec Program: %d loading %s\n", currentThread->space->pcb->GetPID(), name);
+    currentThread->space->SysCallDone();
+    currentThread->Yield();
+    delete name;
+    return newthread->space->pcb->GetPID(); 
+
+}
+
+int Join(SpaceId id) 
+{
+	/* stub */
+	printf("Entering join\n");
+	return 0;
+}
+
+void Create(int arg) 
+{
+        char* fileName;
+        GetFileName(arg, &fileName);
+
+        bool success = fileSystem->Create(fileName, 0);
+
+        if (!success)
+                DEBUG('1', "ASSERT SHOULD FAIL! ===========\n");
+
+        ASSERT(success);
+}
+/* Function stubs for testing */
+
+OpenFileId Open(int arg) 
+{
+	printf("Entering open!!!!!!!!!!\n\n");
+}
+
+
+int ReadHandler(int baddr, int size, int id) 
+{
+	return 1;
+}
+
+
+void WriteHandler(int baddr, int size, int id) 
+{
+/* Dummy */
+}
+
+void myClose(int arg) 
+{
+        SysOpenFile* sfile = NULL;
+        UserOpenFile* ufile = NULL;
+
+        for (int i=0; i < MAX_USER_FILES; i++) 
+		{
+                ufile = currentThread->space->pcb->GetFile(i);
+
+                if (ufile != NULL) {
+                        if (fm->Get(ufile->index)->FileID == arg) {
+                                sfile = fm->Get(ufile->index);
+                                break;
+                        }
+                }
+        }
+
+        if (sfile == NULL) {
+                // THROW AN ERROR
+                return;
+        }
+
+        currentThread->space->pcb->CloseFile(ufile);
+
+
+}
+  
+void IncrementCounters() {
+        //DEBUG('f', "BACK TO THE FUTURE( AKA USER MODE)\n");
+        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg) + 4);
+}
+
+void dumpMemory() {
+        for (int i=0; i < 4096; i++) {
+                DEBUG('6', "%-5d ", machine->mainMemory[i]);
+        }
+}
+
+
 
 void
 ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
+	int ret,arg1,arg2,arg3;Open(machine->ReadRegister(4));	
+	OpenFileId fid;
+	//SpaceId pid =getpid();
+	SpaceId pid = currentThread->space->pcb->GetPID();
+//****************************************
+	if(which ==SyscallException)
+	{
+		int arg = machine->ReadRegister(4);
+		 switch(type)
+		{
+			case SC_Halt:	
+				DEBUG('a',"shutdown initiated by the user program.\n");
+				printf("type = %d\n", type);		
+				interrupt->Halt();
+				break;
+			case SC_Exec:
+                //DEBUG('2', "System Call: %d invoked Exec\n", pid);
+				DEBUG('a',"Exec invoked here.\n");
+                machine->WriteRegister(2, Exec(arg));			
+                break;
+			case SC_Join:
+                 //DEBUG('2', "System Call: %d invoked Join\n", pid);
+                  ret = Join(machine->ReadRegister(4));
+                  machine->WriteRegister(2, ret);
+                  break;
+			case SC_Exit:
+                   //DEBUG('2', "System Call: %d invoked Exit\n", pid);
+                   ExitProcess(machine->ReadRegister(4));
+                   break;
+			case SC_Yield:
+					//DEBUG('2', "System Call: %d invoked Yield\n", pid);
+                    Yield();
+					break;
+             case SC_Fork:
+                    //DEBUG('2', "System Call: %d invoked Fork\n", pid);
+                    arg = machine->ReadRegister(4);
+                    machine->WriteRegister(2, MyFork(arg));
+                    break;   
+			case SC_Open:
+                    DEBUG('2', "System Call: %d invoked Open\n", pid);
+					fid = Open(machine->ReadRegister(4));
+		            machine->WriteRegister(2, fid);
+                    break;
+		    case SC_Create:
+                 //dumpMemory();
+                    DEBUG('2', "System Call: %d invoked Create\n", pid);
+                    Create(machine->ReadRegister(4));
+                    //dumpMemory();
+                    break;
+            case SC_Read:
+	                DEBUG('2', "System Call: %d invoked Read\n", pid);
+                    arg1 = machine->ReadRegister(4);
+                    arg2 = machine->ReadRegister(5);
+                    arg3 = machine->ReadRegister(6);
+                    //dumpMemory();
+                    ret = ReadHandler(arg1, arg2, arg3);
+                    machine->WriteRegister(2, ret);
+                    break;
+            case SC_Write:
+                    dumpMemory();
+                    DEBUG('2', "System Call: %d invoked Write\n", pid);
+                    arg1 = machine->ReadRegister(4);
+                    arg2 = machine->ReadRegister(5);
+                    arg3 = machine->ReadRegister(6);
+                    WriteHandler(arg1, arg2, arg3);
+                    break;
+            case SC_Close:
+                    DEBUG('2', "System Call: %d invoked Close\n", pid);
+                    myClose(machine->ReadRegister(4));
+                    break;
+			default:
+				printf("for exception type %d, code not written yet \n");
+				ASSERT(FALSE);				
+				break;
+		}
+		currentThread->space->SysCallDone();
+        IncrementCounters();
 
-    if ((which == SyscallException) && (type == SC_Halt)) {
+	}
+	else
+	{
+		printf("code not written for this exception %d\n",type);
+		ASSERT(FALSE);
+	}
+}	
+//******************
+//original code of this file 
+
+ /*   if ((which == SyscallException) && (type == SC_Halt)) {
+	
 	DEBUG('a', "Shutdown, initiated by user program.\n");
    	interrupt->Halt();
     } else {
 	printf("Unexpected user mode exception %d %d\n", which, type);
 	ASSERT(FALSE);
     }
-}
+}*/

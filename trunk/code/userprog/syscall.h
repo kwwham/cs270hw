@@ -43,7 +43,7 @@
  */
 
 /* Stop Nachos, and print out performance stats */
-void Halt();		
+void Halt();
  
 
 /* Address space control operations: Exit, Exec, and Join */

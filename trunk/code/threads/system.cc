@@ -29,6 +29,11 @@ SynchDisk   *synchDisk;
 
 #ifdef USER_PROGRAM	// requires either FILESYS or FILESYS_STUB
 Machine *machine;	// user program memory and registers
+MemoryManager *memory;  // user program memory manager
+ProcessManager *pm;     // user program process manager
+SysOpenFileManager* fm;
+char* diskBuffer;
+Lock* db_lock;
 #endif
 
 #ifdef NETWORK
@@ -159,6 +164,15 @@ Initialize(int argc, char **argv)
     fileSystem = new FileSystem(format);
 #endif
 
+#ifdef USER_PROGRAM
+    memory = new MemoryManager();
+    pm = new ProcessManager();
+    fm = new SysOpenFileManager();
+    diskBuffer = new char[PageSize];
+    db_lock = new Lock("db_lock");
+#endif
+
+
 #ifdef NETWORK
     postOffice = new PostOffice(netname, rely, 10);
 #endif
@@ -178,6 +192,10 @@ Cleanup()
     
 #ifdef USER_PROGRAM
     delete machine;
+	delete memory;
+    delete pm;
+	delete diskBuffer;
+    delete db_lock;
 #endif
 
 #ifdef FILESYS_NEEDED
