@@ -258,8 +258,8 @@ void AddrSpace::SysCallDone() {
 
 int AddrSpace::Clone(AddrSpace** copySpace) {
     AddrSpace* newspace;
-
-
+	
+	printf(" number of pages =%d and free pages =%d\n",numPages,memory->freePages());
     if (memory->freePages() < numPages) {
         printf("Not enough free memory to fork!\n");
         *copySpace == NULL;

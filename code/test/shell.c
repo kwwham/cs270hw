@@ -5,9 +5,14 @@ int main()
     SpaceId newProc;
     OpenFileId output = ConsoleOutput;
 
-	Write("Before join\n", 11, output);
-	newProc = Exec("hello1");
+	Write("\nBefore join\n", 20, output);
+
+	newProc = Exec("../test/test3_2");
+
+	Write("\nafter Exec\n", 20, output);
+
 	Join(newProc);
-	Write("After join\n", 11, output);
+
+	Write("\nAfter join\n", 20, output);
 }
 
