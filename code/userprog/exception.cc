@@ -37,7 +37,7 @@ int checkTime=1;
 
 long timeDiff(struct timeval s, struct timeval e)
 {
-    return (e.tv_sec - s.tv_sec)*1000000 + (e.tv_usec - s.tv_usec)
+    return (e.tv_sec - s.tv_sec)*1000000 + (e.tv_usec - s.tv_usec);
 }
 
 
@@ -197,7 +197,7 @@ int userReadWrite(int vaddr, char* buffer, int size, int type)
 SpaceId MyFork(int arg)
 {
 	
-	printf(" Entering Fork !!!! \n");
+    printf("Entering Fork !!!! \n");
     AddrSpace *space, *copyspace;
     Thread *newthread;
 
@@ -226,9 +226,9 @@ SpaceId MyFork(int arg)
 
 void Yield() 
 {
-		printf("\n I am trying to yield\n");
+	printf("\n I am trying to yield\n");
         currentThread->Yield();
-		printf("\n I just yielded \n");
+	printf("\n I just yielded \n");
 }
 
 
@@ -304,9 +304,15 @@ SpaceId Exec(int vaddr)
 	newthread->Fork(processCreator, 0);
     delete executable;
     DEBUG('2', "Exec Program: %d loading %s\n", currentThread->space->pcb->GetPID(), name);
+				
+gettimeofday(&end, NULL);
+if(checkTime) printf("*******Time elapsed for Exec: %ld\n", timeDiff(start, end)); //checkTime determines whether it prints out the time info or not			
+    
     currentThread->space->SysCallDone();
     currentThread->Yield();
     delete name;
+
+				
     return newthread->space->pcb->GetPID(); 
 
 }
@@ -581,7 +587,10 @@ ExceptionHandler(ExceptionType which)
 				break;
 			case SC_Exec:
 				DEBUG('a',"Exec invoked here.\n");
-                		machine->WriteRegister(2, Exec(arg));			
+				gettimeofday(&start, NULL);
+                		machine->WriteRegister(2, Exec(arg));
+				gettimeofday(&end, NULL);
+				if(checkTime) printf("Time elapsed for Exec: %ld\n", timeDiff(start, end)); //checkTime determines whether it prints out the time info or not			
                 		break;
 			case SC_Join:
                  		DEBUG('2', "System Call: %d invoked Join\n", pid);
@@ -589,7 +598,7 @@ ExceptionHandler(ExceptionType which)
                   		machine->WriteRegister(2, ret);
                   		break;
 			case SC_Exit:
-                   		DEBUG('2', "System Call: %d invoked :\n", pid);
+                   		DEBUG('2', "System Call: %d invoked Exit:\n", pid);
                    		ExitProcess(machine->ReadRegister(4));
                    		break;
 			case SC_Yield:
@@ -598,41 +607,53 @@ ExceptionHandler(ExceptionType which)
 				break;
              		case SC_Fork:
                     		DEBUG('2', "System Call: %d invoked Fork\n", pid);
+				gettimeofday(&start, NULL);
+				printf("joon, it goes into SC_Fork\n");
                     		arg = machine->ReadRegister(4);
                     		machine->WriteRegister(2, MyFork(arg));
+				gettimeofday(&end, NULL);
+				if(checkTime) printf("Time elapsed for Fork: %ld\n", timeDiff(start, end)); //checkTime determines whether it prints out the time info or not			
                     		break;   
 			case SC_Open:
                     		DEBUG('2', "System Call: %d invoked Open\n", pid);
 				fid = Open(machine->ReadRegister(4));
 		        	machine->WriteRegister(2, fid);
                     		break;
-		    case SC_Create:
+		    	case SC_Create:
                  		//dumpMemory();
                     		DEBUG('2', "System Call: %d invoked Create\n", pid);
                     		Create(machine->ReadRegister(4));
                     		//dumpMemory();
                     		break;
-            case SC_Read:
-	                DEBUG('2', "System Call: %d invoked Read\n", pid);
-                    arg1 = machine->ReadRegister(4);
-                    arg2 = machine->ReadRegister(5);
-                    arg3 = machine->ReadRegister(6);
-                    //dumpMemory();
-                    ret = ReadHandler(arg1, arg2, arg3);
-                    machine->WriteRegister(2, ret);
-                    break;
-            case SC_Write:
-                    dumpMemory();
-                    DEBUG('2', "System Call: %d invoked Write\n", pid);
-                    arg1 = machine->ReadRegister(4);
-                    arg2 = machine->ReadRegister(5);
-                    arg3 = machine->ReadRegister(6);
-                    WriteHandler(arg1, arg2, arg3);
-                    break;
-            case SC_Close:
-                    DEBUG('2', "System Call: %d invoked Close\n", pid);
-                    myClose(machine->ReadRegister(4));
-                    break;
+            		case SC_Read:
+	                	DEBUG('2', "System Call: %d invoked Read\n", pid);
+				gettimeofday(&start, NULL);
+                    		arg1 = machine->ReadRegister(4);
+                    		arg2 = machine->ReadRegister(5);
+                    		arg3 = machine->ReadRegister(6);
+                    		//dumpMemory();
+                    		ret = ReadHandler(arg1, arg2, arg3);
+                    		machine->WriteRegister(2, ret);
+				gettimeofday(&end, NULL);
+				if(checkTime) printf("Time elapsed for Read: %ld\n", timeDiff(start, end)); //checkTime determines whether it prints out the time info or not,		
+
+                    		break;
+            		case SC_Write:
+				gettimeofday(&start, NULL);
+                    		dumpMemory();
+                   		DEBUG('2', "System Call: %d invoked Write\n", pid);
+                    		arg1 = machine->ReadRegister(4);
+                    		arg2 = machine->ReadRegister(5);
+                    		arg3 = machine->ReadRegister(6);
+                   		WriteHandler(arg1, arg2, arg3);
+				gettimeofday(&end, NULL);
+				if(checkTime) printf("Time elapsed for Write: %ld\n", timeDiff(start, end)); //checkTime determines whether it prints out the time info or not			
+
+                    		break;
+            		case SC_Close:
+                    		DEBUG('2', "System Call: %d invoked Close\n", pid);
+                    		myClose(machine->ReadRegister(4));
+                    		break;
 			default:
 				printf("for exception type %d, code not written yet \n");
 				ASSERT(FALSE);				
