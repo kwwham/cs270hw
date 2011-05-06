@@ -1,0 +1,618 @@
+CS270 HW1_WRITEUP
+Youngjoon Choi (ejoonie@gmail.com) and Sujay Sundaram(sujaysundaram@gmail.com)
+project status: 100% complete
+For discussions we are available on: Tuesdays or on Thursdays after 1:00pm
+***************************************************
+*	Comment for TASK 1
+**************************************************
+For this task we have implemented synchornization using SEMAPHORES so that all the threads see the same final value when they finish. We have also implemented barrier function where all the threads in a perticular iteraton will enter a function wait() and wait for all the other threads to complete by this even when random interruputs are enabled, all the threads see the same final value.
+
+The function Wait() is implemented in threadtest.cc
+
+***************************************************
+*	Comment for task 2 and 3
+***************************************************
+For this task we have implemented Locks for mutual exclusion between threads. All the missing functions for locks have been implemented along with a function isHeldByCurrentthread() to check if the current thread holds the lock or not. 
+
+For the task 3, We have implemented all the condition operations along with the test case to verify whether conditions are working correctly or not.A preprocessor symbol HW1_TASK3 is used for this task and the function name that we have implemented is called ConditionTestMain() which is in threadtest.cc.
+
+Semaphore, Lock, and Condition are implemented in synch.cc
+***************************************************
+*       Comment for task 4
+***************************************************
+For this task we have placed the code that checks the start time and the end time around the SWITCH(oldThread,nextThread) in the scheduler.cc file to measure the average time taken to perform the context switch. We measure time with different number of threads. We observed the data as follows:
+
+for 2 threads: time = 2 microsec
+for 10 threads: time= 54 microsec
+for 100 threads: time = 327 microsec
+for 1000 threads: time= 464 microsec
+
+We observed that the average time increase as we have larger number of threads. We think that this is because when context switching happens the nacho saves the data from the registers into memory.Therefore the larger number of threads leads the bigger cache miss rate which will increase the average context switch time.
+
+
+We have also measured the average runtime for each thread by changing the number of threads and the memorysize. Here are some of the observations (in microseconds):
+
+1 Threads with 128KB Memory: 489.000000
+2 Threads with 128KB Memory: 411.500000
+10 Threads with 128KB Memory: 384.000000
+1000 Threads with 128KB Memory: 385.906000
+
+1 Threads with 256KB Memory: 893.000000
+2 Threads with 256KB Memory: 812.500000
+10 Threads with 256KB Memory: 759.600000
+1000 Threads with 256KB Memory: 754.702000
+
+1 Threads with 8MB Memory: 27370.000000
+2 Threads with 8MB Memory: 27078.000000
+10 Threads with 8MB Memory: 27146.000000
+1000 Threads with 8MB Memory: 27112.330000
+
+1 Threads with 16MB Memory: 54203.000000
+2 Threads with 16MB Memory: 54145.500000
+10 Threads with 16MB Memory: 54561.800000
+1000 Threads with 16MB Memory: 54399.491000
+
+Each threads has its own character array in the heap space and reads each block one by one. The average run time increases as the size of the memory increases. It does not seem to change with the number of threads. Also consider the above observation, where we can see that for a perticular number of threads the run time doubles when we doubled the size of the memory. 
+
+**********************************************************************************************************************************************************************av
+*
+*						Output Results
+*
+*********************************************************************************************************************************************************************
+*
+*	TASK 1 - HW1_SEMAPHORES
+*
+***************************************************
+***************************************************
+*	Without Semaphore
+***************************************************
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 0
+*** thread 0 sees value 0
+*** thread 0 sees value 1
+*** thread 0 sees value 2
+*** thread 0 sees value 3
+*** thread 0 sees value 4
+Thread 0 sees final value 5
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 194, idle 74, system 120, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 1
+*** thread 0 sees value 0
+*** thread 0 sees value 1
+*** thread 0 sees value 2
+*** thread 0 sees value 3
+*** thread 0 sees value 4
+Thread 0 sees final value 5
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 194, idle 74, system 120, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 2
+*** thread 0 sees value 0
+*** thread 1 sees value 0
+*** thread 0 sees value 1
+*** thread 1 sees value 1
+*** thread 0 sees value 2
+*** thread 1 sees value 3
+*** thread 0 sees value 3
+*** thread 1 sees value 4
+*** thread 0 sees value 4
+*** thread 1 sees value 5
+Thread 0 sees final value 6
+Thread 1 sees final value 6
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 275, idle 25, system 250, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 3
+*** thread 0 sees value 0
+*** thread 1 sees value 0
+*** thread 2 sees value 0
+*** thread 0 sees value 1
+*** thread 1 sees value 1
+*** thread 2 sees value 2
+*** thread 0 sees value 2
+*** thread 1 sees value 2
+*** thread 0 sees value 3
+*** thread 1 sees value 3
+*** thread 2 sees value 3
+*** thread 0 sees value 4
+*** thread 2 sees value 4
+*** thread 1 sees value 5
+Thread 0 sees final value 5
+*** thread 2 sees value 6
+Thread 1 sees final value 6
+Thread 2 sees final value 7
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 407, idle 27, system 380, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 4
+*** thread 0 sees value 0
+*** thread 1 sees value 0
+*** thread 2 sees value 0
+*** thread 3 sees value 0
+*** thread 0 sees value 1
+*** thread 1 sees value 1
+*** thread 2 sees value 1
+*** thread 3 sees value 2
+*** thread 1 sees value 2
+*** thread 2 sees value 2
+*** thread 0 sees value 3
+*** thread 3 sees value 3
+*** thread 1 sees value 3
+*** thread 2 sees value 3
+*** thread 3 sees value 4
+*** thread 0 sees value 4
+*** thread 1 sees value 4
+*** thread 2 sees value 4
+*** thread 3 sees value 5
+*** thread 0 sees value 5
+Thread 2 sees final value 5
+Thread 1 sees final value 6
+Thread 3 sees final value 6
+Thread 0 sees final value 6
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 574, idle 64, system 510, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+
+***************************************************
+*	With Semaphore
+***************************************************
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 0
+*** thread 0 sees value 0
+*** thread 0 sees value 1
+*** thread 0 sees value 2
+*** thread 0 sees value 3
+*** thread 0 sees value 4
+Thread 0 sees final value 5
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 275, idle 25, system 250, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 1
+*** thread 0 sees value 0
+*** thread 0 sees value 1
+*** thread 0 sees value 2
+*** thread 0 sees value 3
+*** thread 0 sees value 4
+Thread 0 sees final value 5
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 275, idle 25, system 250, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 2
+*** thread 0 sees value 0
+*** thread 1 sees value 1
+*** thread 0 sees value 2
+*** thread 1 sees value 3
+*** thread 0 sees value 4
+*** thread 1 sees value 5
+*** thread 0 sees value 6
+*** thread 1 sees value 7
+*** thread 0 sees value 8
+*** thread 1 sees value 9
+Thread 1 sees final value 10
+Thread 0 sees final value 10
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 574, idle 54, system 520, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 3
+*** thread 0 sees value 0
+*** thread 1 sees value 1
+*** thread 2 sees value 2
+*** thread 0 sees value 3
+*** thread 1 sees value 4
+*** thread 2 sees value 5
+*** thread 1 sees value 6
+*** thread 0 sees value 7
+*** thread 2 sees value 8
+*** thread 0 sees value 9
+*** thread 1 sees value 10
+*** thread 2 sees value 11
+*** thread 0 sees value 12
+*** thread 2 sees value 13
+*** thread 1 sees value 14
+Thread 1 sees final value 15
+Thread 2 sees final value 15
+Thread 0 sees final value 15
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 914, idle 84, system 830, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 4
+*** thread 0 sees value 0
+*** thread 1 sees value 1
+*** thread 2 sees value 2
+*** thread 3 sees value 3
+*** thread 0 sees value 4
+*** thread 1 sees value 5
+*** thread 0 sees value 6
+*** thread 3 sees value 7
+*** thread 2 sees value 8
+*** thread 3 sees value 9
+*** thread 0 sees value 10
+*** thread 1 sees value 11
+*** thread 2 sees value 12
+*** thread 1 sees value 13
+*** thread 0 sees value 14
+*** thread 3 sees value 15
+*** thread 2 sees value 16
+*** thread 1 sees value 17
+*** thread 3 sees value 18
+*** thread 2 sees value 19
+Thread 2 sees final value 20
+Thread 3 sees final value 20
+Thread 1 sees final value 20
+Thread 0 sees final value 20
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 1285, idle 95, system 1190, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 5
+*** thread 0 sees value 0
+*** thread 1 sees value 1
+*** thread 2 sees value 2
+*** thread 3 sees value 3
+*** thread 4 sees value 4
+*** thread 3 sees value 5
+*** thread 1 sees value 6
+*** thread 2 sees value 7
+*** thread 1 sees value 8
+*** thread 4 sees value 9
+*** thread 3 sees value 10
+*** thread 0 sees value 11
+*** thread 3 sees value 12
+*** thread 1 sees value 13
+*** thread 4 sees value 14
+*** thread 2 sees value 15
+*** thread 0 sees value 16
+*** thread 3 sees value 17
+*** thread 1 sees value 18
+*** thread 4 sees value 19
+*** thread 2 sees value 20
+*** thread 0 sees value 21
+*** thread 4 sees value 22
+*** thread 2 sees value 23
+*** thread 0 sees value 24
+Thread 0 sees final value 25
+Thread 2 sees final value 25
+Thread 4 sees final value 25
+Thread 1 sees final value 25
+Thread 3 sees final value 25
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 1735, idle 135, system 1600, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+**************************************************
+*
+*	TASK 2 - HW1_LOCKS *	TASK 2 - HW1_LOCKS 
+*
+***************************************************
+
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 0
+*** thread 0 sees value 0
+*** thread 0 sees value 1
+*** thread 0 sees value 2
+*** thread 0 sees value 3
+*** thread 0 sees value 4
+Thread 0 sees final value 5
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 194, idle 74, system 120, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 1
+*** thread 0 sees value 0
+*** thread 0 sees value 1
+*** thread 0 sees value 2
+*** thread 0 sees value 3
+*** thread 0 sees value 4
+Thread 0 sees final value 5
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 194, idle 74, system 120, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 2
+*** thread 0 sees value 0
+*** thread 1 sees value 0
+*** thread 0 sees value 1
+*** thread 1 sees value 1
+*** thread 0 sees value 2
+*** thread 1 sees value 3
+*** thread 0 sees value 3
+*** thread 1 sees value 4
+*** thread 0 sees value 4
+*** thread 1 sees value 5
+Thread 1 sees final value 6
+Thread 0 sees final value 6
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 275, idle 15, system 260, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 3
+*** thread 0 sees value 0
+*** thread 1 sees value 0
+*** thread 2 sees value 0
+*** thread 0 sees value 1
+*** thread 1 sees value 1
+*** thread 2 sees value 2
+*** thread 0 sees value 2
+*** thread 1 sees value 2
+*** thread 0 sees value 3
+*** thread 1 sees value 3
+*** thread 2 sees value 3
+*** thread 0 sees value 4
+*** thread 2 sees value 4
+*** thread 1 sees value 5
+*** thread 2 sees value 6
+Thread 2 sees final value 7
+Thread 0 sees final value 7
+Thread 1 sees final value 7
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 574, idle 114, system 460, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 4
+*** thread 0 sees value 0
+*** thread 1 sees value 0
+*** thread 2 sees value 0
+*** thread 3 sees value 0
+*** thread 0 sees value 1
+*** thread 1 sees value 1
+*** thread 2 sees value 1
+*** thread 3 sees value 2
+*** thread 1 sees value 2
+*** thread 2 sees value 2
+*** thread 0 sees value 3
+*** thread 3 sees value 3
+*** thread 1 sees value 3
+*** thread 2 sees value 3
+*** thread 3 sees value 4
+*** thread 0 sees value 4
+*** thread 1 sees value 4
+*** thread 2 sees value 4
+*** thread 3 sees value 5
+*** thread 0 sees value 5
+Thread 0 sees final value 6
+Thread 1 sees final value 6
+Thread 2 sees final value 6
+Thread 3 sees final value 6
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 574, idle 24, system 550, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+[ychoi01@csil code]$ ./threads/nachos -rs 4 -q 5
+*** thread 0 sees value 0
+*** thread 1 sees value 0
+*** thread 2 sees value 0
+*** thread 3 sees value 0
+*** thread 4 sees value 0
+*** thread 0 sees value 1
+*** thread 2 sees value 1
+*** thread 3 sees value 1
+*** thread 4 sees value 1
+*** thread 1 sees value 1
+*** thread 2 sees value 2
+*** thread 4 sees value 2
+*** thread 0 sees value 2
+*** thread 1 sees value 2
+*** thread 3 sees value 3
+*** thread 2 sees value 3
+*** thread 4 sees value 4
+*** thread 0 sees value 4
+*** thread 3 sees value 4
+*** thread 1 sees value 5
+*** thread 2 sees value 5
+*** thread 4 sees value 5
+*** thread 0 sees value 5
+*** thread 3 sees value 6
+*** thread 1 sees value 6
+Thread 3 sees final value 7
+Thread 4 sees final value 7
+Thread 0 sees final value 7
+Thread 1 sees final value 7
+Thread 2 sees final value 7
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 746, idle 16, system 730, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+***************************************************
+*
+*	TASK 3 - HW1_TASK3 
+*
+***************************************************
+[ychoi01@csil code]$ ./threads/nachos -rs -q 3 
+Condition Test: thread 0 sees value 0
+Condition Test: thread 0 sees value 1
+Condition Test: thread 0 sees value 2
+Condition Test: thread 0 sees value 3
+Condition Test: thread 0 sees value 4
+Condition Test: thread 1 sees value 5
+Condition Test: thread 1 sees value 6
+Condition Test: thread 1 sees value 7
+Condition Test: thread 1 sees value 8
+Condition Test: thread 1 sees value 9
+Condition Test: thread 2 sees value 10
+Condition Test: thread 2 sees value 11
+Condition Test: thread 2 sees value 12
+Condition Test: thread 2 sees value 13
+Condition Test: thread 2 sees value 14
+Condition Test: thread 2 sees final value 15
+Condition Test: thread 3 sees value 15
+Condition Test: thread 3 sees value 16
+Condition Test: thread 3 sees value 17
+Condition Test: thread 3 sees value 18
+Condition Test: thread 3 sees value 19
+Condition Test: thread 3 sees final value 20
+Condition Test: thread 4 sees value 20
+Condition Test: thread 4 sees value 21
+Condition Test: thread 4 sees value 22
+Condition Test: thread 4 sees value 23
+Condition Test: thread 4 sees value 24
+Condition Test: thread 4 sees final value 25
+Condition Test: thread 5 sees value 25
+Condition Test: thread 5 sees value 26
+Condition Test: thread 5 sees value 27
+Condition Test: thread 5 sees value 28
+Condition Test: thread 5 sees value 29
+Condition Test: thread 5 sees final value 30
+Condition Test: thread 6 sees value 30
+Condition Test: thread 6 sees value 31
+Condition Test: thread 6 sees value 32
+Condition Test: thread 6 sees value 33
+Condition Test: thread 6 sees value 34
+Condition Test: thread 6 sees final value 35
+Condition Test: thread 8 sees value 35
+Condition Test: thread 8 sees value 36
+Condition Test: thread 8 sees value 37
+Condition Test: thread 8 sees value 38
+Condition Test: thread 8 sees value 39
+Condition Test: thread 8 sees final value 40
+Condition Test: thread 9 sees value 40
+Condition Test: thread 9 sees value 41
+Condition Test: thread 9 sees value 42
+Condition Test: thread 9 sees value 43
+Condition Test: thread 9 sees value 44
+Condition Test: thread 9 sees final value 45
+Condition Test: thread 0 sees final value 45
+Condition Test: thread 1 sees final value 45
+Condition Test: thread 7 sees value 45
+Condition Test: thread 7 sees value 46
+Condition Test: thread 7 sees value 47
+Condition Test: thread 7 sees value 48
+Condition Test: thread 7 sees value 49
+Condition Test: thread 7 sees final value 50
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 277, idle 37, system 240, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+***************************************************
