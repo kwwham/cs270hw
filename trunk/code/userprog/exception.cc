@@ -29,6 +29,18 @@
 #include <iostream>
 #include <stdio.h>
 
+#include <time.h>
+#include <sys/time.h>
+
+struct timeval start, end;
+int checkTime=1;
+
+long timeDiff(struct timeval s, struct timeval e)
+{
+    return (e.tv_sec - s.tv_sec)*1000000 + (e.tv_usec - s.tv_usec)
+}
+
+
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -185,6 +197,7 @@ int userReadWrite(int vaddr, char* buffer, int size, int type)
 SpaceId MyFork(int arg)
 {
 	
+	printf(" Entering Fork !!!! \n");
     AddrSpace *space, *copyspace;
     Thread *newthread;
 
@@ -213,17 +226,33 @@ SpaceId MyFork(int arg)
 
 void Yield() 
 {
+		printf("\n I am trying to yield\n");
         currentThread->Yield();
+		printf("\n I just yielded \n");
 }
 
 
 void ExitProcess(int status)
 {	
-/* should Include code here ... this is a dummy function */
-	currentThread->Finish();
-
-
+/* Working */
+	if (status < 0) 
+	{
+       status = 0;
+    }
+    SpaceId pid = currentThread->space->pcb->GetPID();
+	printf("The pid of the process is %d \n", pid);
+    DEBUG('f', "Process %d exits with %d\n", pid, status);
+    currentThread->space->pcb->SetStatus(status);
+    pm->Broadcast(pid);
+    //currentThread->Yield(); // Experimental idea
+    machine->WriteRegister(2,0);
+    if (pm->GetJoins(pid) == 0) {
+            pm->ClearPID(currentThread->space->pcb->GetPID());
+    }
+    currentThread->space->~AddrSpace();
+    currentThread->Finish();
 }
+
 void GetFileName(int vaddr, char** ptr) {
         int paddr;
 
@@ -286,7 +315,16 @@ int Join(SpaceId id)
 {
 	/* stub */
 	printf("Entering join\n");
-	return 0;
+	pm->Join(id);
+    pm->DecrementJoins(id);
+    int exit_status = pm->GetStatus(id);
+    if (pm->GetJoins(id) == 0) {
+            //machine->WriteRegister(2,0);
+            pm->ClearPID(currentThread->space->pcb->GetPID());
+            //currentThread->space->~AddrSpace();
+            //currentThread->Finish();
+    }
+    return exit_status;
 }
 
 void Create(int arg) 
@@ -306,18 +344,178 @@ void Create(int arg)
 OpenFileId Open(int arg) 
 {
 	printf("Entering open!!!!!!!!!!\n\n");
+	char* fileName;
+    GetFileName(arg, &fileName);
+    int index;
+    SysOpenFile* sfile = fm->Get(fileName, index);
+
+    if (sfile != NULL) {
+            sfile->userOpens++;
+		printf(" check1 = %d\n",sfile->userOpens++);    
+	}
+    else {
+            OpenFile* ofile = fileSystem->Open(fileName);
+            sfile = new SysOpenFile(fileName, ofile, -1);
+            index = fm->Add(sfile);
+		printf(" check2\n");    
+    }
+
+    UserOpenFile* ufile = new UserOpenFile();
+    ufile->fileName = fileName;
+    ufile->index = index;
+
+    DEBUG('z', "Creating new file with index %d and file name %s......\n", ufile->index, ufile->fileName);
+	printf("Creating new file with index %d and file name %s......\n", ufile->index, ufile->fileName);
+    currentThread->space->pcb->AddFile(ufile);
+
+    return sfile->FileID;
 }
 
 
 int ReadHandler(int baddr, int size, int id) 
 {
-	return 1;
+	/*   Dummy  */
+	int paddr;
+    char buffer[size + 1];
+    int read = 0;
+
+    SysOpenFile* sfile = NULL;
+    UserOpenFile* ufile = NULL;
+
+    //currentThread->space->Translate(baddr, &paddr);
+
+    if (id == ConsoleInput) {
+            while (read < size) {
+                    buffer[read] = getchar();
+                    read++;
+            }
+
+            //buffer[read] = '\0';
+
+            char next = 'a';
+
+            // Get rid of excess characters
+            while ((next != '\n')&&(next != EOF)) {
+                    next = getchar();
+            }
+
+            //DEBUG('9', "INPUT: %s\n", buffer); 
+
+            //printf("%s\n", machine->mainMemory[baddr]);
+    }
+	else {
+            for (int i=0; i < MAX_USER_FILES; i++) {
+                    ufile = currentThread->space->pcb->GetFile(i);
+
+                    if (ufile != NULL) {
+                            if (fm->Get(ufile->index)->FileID == id) {
+                                    sfile = fm->Get(ufile->index);
+                                    break;
+                            }
+                    }
+            }
+
+            if (sfile == NULL) {
+                    // THROW AN ERROR
+                    return 0;
+            }
+
+            sfile->lock->Acquire();
+            int read = sfile->file->ReadAt(buffer, size, ufile->offset);
+            sfile->lock->Release();
+            buffer[read] = '\0';
+
+            DEBUG('z', "Read %d bytes, should have read %d, from offset %d, says: %s\n", read, size, ufile->offset, buffer);
+
+            //userReadWrite(baddr, buffer, size, 0);
+    }
+
+    DEBUG('f', "Almost done!\n");
+
+    userReadWrite(baddr, buffer, size, 0);
+
+    return read;
 }
 
 
 void WriteHandler(int baddr, int size, int id) 
 {
-/* Dummy */
+	/* Working */
+	int paddr;
+    char buffer[size + 1];
+
+    SysOpenFile* sfile = NULL;
+    UserOpenFile* ufile = NULL;
+
+    if (!currentThread->space->Translate(baddr, &paddr, false)) {
+            DEBUG('z', "Translate failed...\n");
+            return;
+    }
+
+    if (id == ConsoleOutput) {
+            char format[10];
+            strncpy(format, "%.", 2);
+            int printed = 0;
+
+            while(printed < size) {
+                    // Find out how much of the page is remaining...
+                    int read_size = PageSize - (baddr % PageSize);
+
+                    if (read_size > size - printed) {
+                            read_size = size - printed;
+                    }
+
+                    int i = sprintf(format+2, "%.6d", read_size);
+                    strncpy(format + 2 + i, "s\0", 2);
+
+                    printf(format, machine->mainMemory + paddr);
+
+                    printed += read_size;
+                    baddr += read_size;
+
+                    if (!currentThread->space->Translate(baddr, &paddr, false)) {
+                            DEBUG('z', "Translate failed...\n");
+                            return;
+                    }
+            }
+    }
+	else {
+            for (int i=0; i < MAX_USER_FILES; i++) {
+                    ufile = currentThread->space->pcb->GetFile(i);
+
+                    if (ufile != NULL) {
+                            if (fm->Get(ufile->index)->FileID == id) {
+                                    sfile = fm->Get(ufile->index);
+                                    break;
+                            }
+                    }
+            }
+
+            if (sfile == NULL) {
+                    // THROW AN ERROR
+                    return;
+            }
+
+            int bytes_wrote = 0;
+            int initial_length = 0;
+            int new_length = 0;
+            int fid = ufile->index;
+
+            userReadWrite(baddr, buffer, size, 1);
+            sfile->lock->Acquire();
+            initial_length = sfile->file->Length();
+            bytes_wrote = sfile->file->Write(buffer, size);
+            new_length = sfile->file->Length();
+            sfile->lock->Release();
+            ufile->offset += size;
+
+            DEBUG('3', "F %d %d: %d -> %d\n", currentThread->space->pcb->GetPID(), fid, initial_length, new_length);
+
+            //DEBUG('f', "Outputting userReadWrite(1), %s\n", buffer);
+    }
+	printf("\nWrtie finished\n\n");
+    DEBUG('1', "End WRITE system call\n");
+
 }
 
 void myClose(int arg) 
@@ -366,7 +564,7 @@ void
 ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
-	int ret,arg1,arg2,arg3;Open(machine->ReadRegister(4));	
+	int ret,arg1,arg2,arg3;
 	OpenFileId fid;
 	//SpaceId pid =getpid();
 	SpaceId pid = currentThread->space->pcb->GetPID();
@@ -382,39 +580,38 @@ ExceptionHandler(ExceptionType which)
 				interrupt->Halt();
 				break;
 			case SC_Exec:
-                //DEBUG('2', "System Call: %d invoked Exec\n", pid);
 				DEBUG('a',"Exec invoked here.\n");
-                machine->WriteRegister(2, Exec(arg));			
-                break;
+                		machine->WriteRegister(2, Exec(arg));			
+                		break;
 			case SC_Join:
-                 //DEBUG('2', "System Call: %d invoked Join\n", pid);
-                  ret = Join(machine->ReadRegister(4));
-                  machine->WriteRegister(2, ret);
-                  break;
+                 		DEBUG('2', "System Call: %d invoked Join\n", pid);
+                  		ret = Join(machine->ReadRegister(4));
+                  		machine->WriteRegister(2, ret);
+                  		break;
 			case SC_Exit:
-                   //DEBUG('2', "System Call: %d invoked Exit\n", pid);
-                   ExitProcess(machine->ReadRegister(4));
-                   break;
+                   		DEBUG('2', "System Call: %d invoked :\n", pid);
+                   		ExitProcess(machine->ReadRegister(4));
+                   		break;
 			case SC_Yield:
-					//DEBUG('2', "System Call: %d invoked Yield\n", pid);
-                    Yield();
-					break;
-             case SC_Fork:
-                    //DEBUG('2', "System Call: %d invoked Fork\n", pid);
-                    arg = machine->ReadRegister(4);
-                    machine->WriteRegister(2, MyFork(arg));
-                    break;   
+				DEBUG('2', "System Call: %d invoked Yield\n", pid);
+                    		Yield();
+				break;
+             		case SC_Fork:
+                    		DEBUG('2', "System Call: %d invoked Fork\n", pid);
+                    		arg = machine->ReadRegister(4);
+                    		machine->WriteRegister(2, MyFork(arg));
+                    		break;   
 			case SC_Open:
-                    DEBUG('2', "System Call: %d invoked Open\n", pid);
-					fid = Open(machine->ReadRegister(4));
-		            machine->WriteRegister(2, fid);
-                    break;
+                    		DEBUG('2', "System Call: %d invoked Open\n", pid);
+				fid = Open(machine->ReadRegister(4));
+		        	machine->WriteRegister(2, fid);
+                    		break;
 		    case SC_Create:
-                 //dumpMemory();
-                    DEBUG('2', "System Call: %d invoked Create\n", pid);
-                    Create(machine->ReadRegister(4));
-                    //dumpMemory();
-                    break;
+                 		//dumpMemory();
+                    		DEBUG('2', "System Call: %d invoked Create\n", pid);
+                    		Create(machine->ReadRegister(4));
+                    		//dumpMemory();
+                    		break;
             case SC_Read:
 	                DEBUG('2', "System Call: %d invoked Read\n", pid);
                     arg1 = machine->ReadRegister(4);
