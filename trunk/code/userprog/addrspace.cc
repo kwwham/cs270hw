@@ -90,6 +90,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
 						// virtual memory
 
 /* Added For HW2*/
+	//printf(" if numPages =%d > freepages= %d",numPages,memory->freePages());
 	if (numPages > memory->freePages()) {
         printf("Not enough memory to perform Exec!\n");
         pm->ClearPID(pcb->GetPID());
@@ -120,7 +121,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
     
 // zero out the entire address space, to zero the unitialized data segment 
 // and the stack segment
-    bzero(machine->mainMemory, size);
+    //bzero(machine->mainMemory, size);
 
 // then, copy in the code and data segments into memory
     if (noffH.code.size > 0) {
@@ -128,7 +129,6 @@ AddrSpace::AddrSpace(OpenFile *executable)
 			noffH.code.virtualAddr, noffH.code.size);
 /* Added for Hw2 */
 		ReadFile(noffH.code.virtualAddr, executable, noffH.code.size, noffH.code.inFileAddr);
-	
       //  executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
 		//	noffH.code.size, noffH.code.inFileAddr);
 /* Ends here */
@@ -143,7 +143,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
 	//		noffH.initData.size, noffH.initData.inFileAddr);
 /* Ends here */
     }
-	DEBUG('f', "Loaded program %d code | %d data | %d bss\n", noffH.code.size, noffH.initData.size, noffH.uninitData.size);
+	DEBUG('2', "\nLoaded program %d code | %d data | %d bss\n", noffH.code.size, noffH.initData.size, noffH.uninitData.size);
 }
 
 //----------------------------------------------------------------------
@@ -241,11 +241,6 @@ bool AddrSpace::Translate(int vaddr, int* paddr, bool writing) {
    if (writing) {
       pageTable[vpn].dirty = TRUE;
    }
-
-   #ifdef VM
-   pageTable[vpn].use = TRUE;
-   #endif
-
    return TRUE;
 }
 
@@ -259,7 +254,7 @@ void AddrSpace::SysCallDone() {
 int AddrSpace::Clone(AddrSpace** copySpace) {
     AddrSpace* newspace;
 	
-	printf(" number of pages =%d and free pages =%d\n",numPages,memory->freePages());
+	//printf(" number of pages =%d and free pages =%d\n",numPages,memory->freePages());
     if (memory->freePages() < numPages) {
         printf("Not enough free memory to fork!\n");
         *copySpace == NULL;
