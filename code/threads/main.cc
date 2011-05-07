@@ -142,7 +142,7 @@ printf("1000 Threads with 16MB Memory: %f\n", CostTest(1000, 16*1024*1024));
             printf (copyright);
 #ifdef USER_PROGRAM 
 //- userprog/nachos -x binarycode
-	printf("Entering main.cc\n");
+		//printf("Entering main.cc\n");
         if (!strcmp(*argv, "-x")) {        	// run a user program
 	    ASSERT(argc > 1);
             StartProcess(*(argv + 1));

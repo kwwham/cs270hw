@@ -23,11 +23,13 @@ void test5_1 () {
 
 int main()
 {
-  //int i;
+  int i;
  
   Fork(test5_1);
-  Write( "\nFork 1just happened!\n", 20, ConsoleOutput);
-	//Yield();
+  for(i=0;i<5;i++)
+     Write( "\nFork 1just happened!", 20, ConsoleOutput);
+  Yield();
+  Exit(0);
   //Fork(test5_1);
   //Write( "\nFork 2 just happened!\n", 20, ConsoleOutput);
   //for( i=0 ; i < 2 ; ++i ) {

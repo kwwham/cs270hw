@@ -1,0 +1,77 @@
+					CS270 HW2_WRITEUP
+Youngjoon Choi (ejoonie@gmail.com) and Sujay Sundaram(sujaysundaram@gmail.com)
+project status: 100% complete
+For discussions we are available on: Tuesdays or on Thursdays after 1:00pm
+/************************************************************************************/
+
+	As told: We just ran the below command under the userprog directory and every thing works fine:
+
+			./hw2.sh ~/xxxx/code f1 halt test matmult test3 shell
+
+/*************************************************************************************/
+
+To compile the program:
+	Go to /userprog directory and enter make
+
+To compile test program:
+		Go to /test directory and enter make
+
+Note :
+	1. Please make sure you have made the necessary changes in the Makefile under /test directory
+	2. while running Exec : please give the path as "../test/FILENAME"
+	3.  numofPages defined is 64 as of now. So if you call Exec multiple times , then please change it accordingly in machine.h
+
+To Run the program:
+
+	1. Go to /userprog directory,
+	2. command is : ./nachos -x ../test/FILENAME
+
+For the required output to be displayed 
+	1. --Use debug -2 for required outputs.
+	2. For example : ./nachos -d 2 -x ../test/test1 
+	
+
+All the test Programs run correctly. And the programs are: 
+f1.c , halt.c, matmult.c ,mix_test1.c ( compiled as test),shell.c,sort.c, test1.c , test3.c ( intrun calling test3_1 and test3_2),
+test4.c and test5.
+/*************************************************************************************/
+*
+*		Changes that we have done to the code given to us is as follows:
+*		
+/*************************************************************************************/
+We have implemented all the system calls: Fork(), Yield(), Exit(), Exec(), Join(),Creat(), Open(), Read(), Write(), and Close() in exception.cc and the supporting function to these corresponding system calls are present in the same file.
+
+In the files addrspace.cc & addrspace.h we have included the functions Translate(),SysCallDone(),Clone(),ReadFile().
+
+In the files MemoryManager.cc & MemoryManager.h we have included functions: getPage() which allocates the first clear page,clearPage(int i) which takes the index of a page and frees it and freepages() to free the pages and three private attributes (BitMap* bit_mem, int mem_size, 	Lock* mem_lock).
+
+
+In the file PCB.cc & PCB.h In PCB.h, we have a constructor,deconstructor and functions: GetPID(),GetParentPID(),SetParentPID(),GetThread(),SetThread(),GetStatus(), SetStatus(),AddFile(),GetFile(),CloseFile().
+
+In ProcessManager.cc & ProcessManager.h files here is a functions that are included :we have a constructor (ProcessManager()), a deconstructor (~ProcessManager()), eight public functions (void AddProcess(PCB* pcb), SpaceId GetPID(), void ClearPID(SpaceId pid), void Join(SpaceId pid), void Broadcast(SpaceId pid), int GetStatus(SpaceId pid), int GetJoins(SpaceId pid), void DecrementJoins(SpaceId pid)), and five private attributes (PCB** pcbs, Condition** conditions, Lock** locks, int* joins, BitMap* processIDs).
+
+In the filsys directory we have addded files SysOpenFile.cc & SysOpenFile.h 
+In the SysOpenFile class, We created four public attributes (OpenFil* file, OpenFileId FileID, char* fileName, int UserOpens) and one function (SysOpenFile(char* name, OpenFile* f, OpenFileId ID)).In the SysOpenFileManger class, We made a constructor (SysOpenFileManager()), a deconstructor (~SysOpenFileManager()), four functions (int Add(SysOpenFile* newSysOpenFile), SysOpenFile* Get(char* fileName, int& index), SysOpenFile* Get(int index), void Close(int index)), and two private attributes (SysOpenFile* sysOpenFileTable[SOFILETABLE_SIZE], BitMap* bitMap)
+
+In the file UserOpenFile.h, we have one class UserOpenFile. It has three public attributes (char* fileName, int index, int offset)
+/*****************************************************************************************************************************************/
+*
+*Performance  report:
+*
+/*****************************************************************************************************************************************/
+*Nachos (microsec)
+Fork 362
+Exec 326
+Read 14
+Write 299
+
+*Unix (in microsec)
+fork 466
+execv 378
+read 6
+write 7
+
+Note: we have the same file names as that of the sample code given to us as it was easy for us to follow.
+/*****************************************************************************************************************************************/
+
+

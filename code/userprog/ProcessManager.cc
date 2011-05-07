@@ -75,8 +75,6 @@ void ProcessManager::ClearPID(SpaceId pid) {
 
 void ProcessManager::Join(SpaceId pid) {
 	pm_lock->Acquire();
-	printf(" pid > MAx number of process -> %d > %d\n in processmanager.cc\n",pid,MAX_PROCESS);
-
 	if (pid > MAX_PROCESS) {
 		// THROW AN ERROR
 		pm_lock->Release();

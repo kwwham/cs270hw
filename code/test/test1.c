@@ -24,7 +24,7 @@ int main()
   for( i=0 ; i < 256 ; ++i ) usr_buffer_0[i] = 'A';
     
   Write( usr_buffer_0, 128, f0 );
-  
+ //Write( usr_buffer_0, 128, ConsoleOutput); 
   /* reset file pointer of f0 to the starting position */
   Close( f0 );
   f0=Open( "sujay" );
