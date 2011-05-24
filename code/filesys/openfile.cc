@@ -20,7 +20,7 @@
 #endif
 
 //----------------------------------------------------------------------
-// OpenFile::OpenFile
+// OpenFile::OpenFileq
 // 	Open a Nachos file for reading and writing.  Bring the file header
 //	into memory while the file is open.
 //

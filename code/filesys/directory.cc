@@ -25,6 +25,7 @@
 #include "filehdr.h"
 #include "directory.h"
 
+#define MAX_TABLE_SIZE ((4+26*32)*128) / sizeof(DirectoryEntry) // There must be defined for each number 4:direct, 26*32:indrect, and 128:sector size
 //----------------------------------------------------------------------
 // Directory::Directory
 // 	Initialize a directory; initially, the directory is completely
@@ -131,15 +132,68 @@ Directory::Add(char *name, int newSector)
 { 
     if (FindIndex(name) != -1)
 	return FALSE;
+    if (tableSize >= MAX_TABLE_SIZE)
+        return FALSE;
 
-    for (int i = 0; i < tableSize; i++)
+    int i;
+    for (i = 0; i < tableSize; i++)
         if (!table[i].inUse) {
             table[i].inUse = TRUE;
             strncpy(table[i].name, name, FileNameMaxLen); 
             table[i].sector = newSector;
         return TRUE;
 	}
+#ifdef FILESYS
+// increase the capacity
+// never ever efficient code, but it will prevent potential bugs
+    
+    ExpandTable();
+    // i is the the last index before ExpandTable()   
+    if (!table[i].inUse) {
+        table[i].inUse = TRUE;
+        strncpy(table[i].name, name, FileNameMaxLen); 
+        table[i].sector = newSector;
+        return TRUE;
+    }
+
+#endif
     return FALSE;	// no space.  Fix when we have extensible files.
+}
+
+void
+Directory::ExpandTable()
+{
+    const int INC = 10;
+    int newTableSize = tableSize + INC;
+
+    if (newTableSize >= MAX_TABLE_SIZE)
+        newTableSize = MAX_TABLE_SIZE;
+ 
+    DirectoryEntry* newTable = new DirectoryEntry[newTableSize];
+
+    for(int i=0;i<tableSize;i++)
+    {
+        newTable[i].inUse = table[i].inUse;
+        strncpy(newTable[i].name, table[i].name, FileNameMaxLen); 
+        newTable[i].sector = table[i].sector;
+    }
+
+    for (int j = tableSize; j < newTableSize; j++) {
+	newTable[j].inUse = FALSE;
+    }
+
+    tableSize = newTableSize;
+    delete table;
+    table = newTable;
+    
+/*  code from the constructor
+    table = new DirectoryEntry[size];
+    tableSize = size;
+    for (int i = 0; i < tableSize; i++)
+	table[i].inUse = FALSE;
+*/
+
+
 }
 
 //----------------------------------------------------------------------

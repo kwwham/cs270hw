@@ -7,6 +7,7 @@
 
 #include "copyright.h"
 #include "system.h"
+#include "../filesys/filesys.h"
 
 // This defines *all* of the global data structures used by Nachos.
 // These are all initialized and de-allocated by this file.
