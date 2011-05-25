@@ -166,7 +166,20 @@ FileHeader::WriteBack(int sector)
 int
 FileHeader::ByteToSector(int offset)
 {
-    return(dataSectors[offset / SectorSize]);
+#ifdef FILESYS
+    int indirects = ((numSectors - 4) + PointerSectors - 1)/PointerSectors;
+    int sector = offset / SectorSize;
+	
+    if (sector < 4) {
+		return (directDataSectors[offset / SectorSize]);
+    }
+    else {
+	    indirectDataSectors[(sector - 4)/SectorSize]->ByteToSector(offset - 4*SectorSize - ((sector - 4)/SectorSize) * SectorSize);
+    }
+#else
+    return(directDataSectors[offset / SectorSize]);
+#endif
+	
 }
 
 //----------------------------------------------------------------------
