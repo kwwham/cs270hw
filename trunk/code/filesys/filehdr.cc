@@ -204,6 +204,31 @@ FileHeader::Print()
 {
     int i, j, k;
     char *data = new char[SectorSize];
+	
+    printf("FileHeader contents.  File size: %d.  File blocks:\n", numBytes);
+    for (i = 0; i < numSectors; i++)
+		printf("%d ", directDataSectors[i]);
+    printf("\nFile contents:\n");
+    for (i = k = 0; i < numSectors; i++) {
+		synchDisk->ReadSector(directDataSectors[i], data);
+        for (j = 0; (j < SectorSize) && (k < numBytes); j++, k++) {
+			if ('\040' <= data[j] && data[j] <= '\176')   // isprint(data[j])
+				printf("%c", data[j]);
+            else
+				printf("\\%x", (unsigned char)data[j]);
+		}
+        printf("\n"); 
+    }
+    delete [] data;
+}
+
+/*	original code
+ 
+void
+FileHeader::Print()
+{
+    int i, j, k;
+    char *data = new char[SectorSize];
 
     printf("FileHeader contents.  File size: %d.  File blocks:\n", numBytes);
     for (i = 0; i < numSectors; i++)
@@ -221,6 +246,7 @@ FileHeader::Print()
     }
     delete [] data;
 }
+*/
 
 //------------------------------------------------------------------------
 //
