@@ -177,6 +177,7 @@ if ((position + numBytes) <= fileLength)
 // case 2
 else if (position < fileLength) 
 {
+#define FreeMapSector 0
 	int last_byte = position;
 	int offset = last_byte - divRoundDown(last_byte, SectorSize)*SectorSize;
 	int newSectors  = divRoundUp(numBytes - (SectorSize - offset), SectorSize);
