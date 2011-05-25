@@ -252,28 +252,36 @@ int IndirectPointerBlock::ByteToSector(int sectorNumber) {
 
 // ADDED PROJECT 3 -- FINISH ME
 #ifdef FILESYS
-bool FileHeader::ExtendFile(BitMap *freeMap, int n, int bytes) {
-//   numBytes += n;
-//   int offset = numBytes - divRoundDown(numBytes, SectorSize)*SectorSize;
-//   int newSectors  = divRoundUp(n - (SectorSize - offset), SectorSize);
-//   newSectors += ((newSectors - 4) + PointerSectors - 1)/PointerSectors;
-    if (freeMap->NumClear() < n) {
-	printf("Out of disk drive space!\n");
-	return FALSE;		// not enough space
+bool 
+FileHeader::
+ExtendFile
+(BitMap *freeMap, int n, int bytes) {
+	//   is n the number of sectors?
+	//   numBytes += n;
+	//   int offset = numBytes - divRoundDown(numBytes, SectorSize)*SectorSize;
+	//   int newSectors  = divRoundUp(n - (SectorSize - offset), SectorSize);
+	//   newSectors += ((newSectors - 4) + PointerSectors - 1)/PointerSectors;
+    if (freeMap->NumClear() < n) 
+	{
+		printf("Out of disk drive space!\n");
+		return FALSE;		// not enough space
     }
 
     DEBUG('1', "Number of sectors for this file is currently %d, looking to add %d sectors\n", numSectors, n);
 
-    if (numSectors < 4) {
-	int max = n + numSectors;	
+    if (numSectors < 4) 
+	{
+		int max = n + numSectors;	
 
-	if (max > 4) {
+		if (max > 4) 
+		{
            max = 4;
-	}
+		}
 
-        for (int i=numSectors; i < max; i++) {
-	   DEBUG('1', "ALLOCATING A SECTOR........\n");
-           directDataSectors[i] = freeMap->Find();
+        for (int i=numSectors; i < max; i++) 
+		{
+			DEBUG('1', "ALLOCATING A SECTOR........\n");
+			directDataSectors[i] = freeMap->Find();
         }
 
         n = n - (max - numSectors);
@@ -291,12 +299,12 @@ bool FileHeader::ExtendFile(BitMap *freeMap, int n, int bytes) {
     int existing_blocks = divRoundUp((numSectors - 4), PointerSectors);
     int block_space = existing_blocks*PointerSectors - (numSectors - 4);
 
-  //  if (block_space < 0) {
-  //     block_space = PointerSectors;
-  //    if (exisiting_blocks == 0) {
-   //        indirectDataSectors[0] = new IndirectPointerBlock();
-   // //   }
-   // }
+//  if (block_space < 0) {
+//     block_space = PointerSectors;
+//    if (exisiting_blocks == 0) {
+//        indirectDataSectors[0] = new IndirectPointerBlock();
+//    }
+//	}
 
     if (block_space - n > 0) {
        block_space = n;
@@ -310,7 +318,8 @@ bool FileHeader::ExtendFile(BitMap *freeMap, int n, int bytes) {
     //}
     n -= block_space;
 
-    if (n == 0) {
+    if (n == 0) 
+	{
        return true;
     }
 
@@ -318,35 +327,41 @@ bool FileHeader::ExtendFile(BitMap *freeMap, int n, int bytes) {
 
     DEBUG('1', "We're gonna need to create %d new blocks, and we have %d existing blocks\n", new_blocks, existing_blocks);
 
-    for (int j=existing_blocks; j < existing_blocks + new_blocks; j++) {
-	 DEBUG('1', "Allocating a new indirect jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj\n");
-         indirectDataSectors[j] = new IndirectPointerBlock();
+    for (int j=existing_blocks; j < existing_blocks + new_blocks; j++) 
+	{
+		DEBUG('1', "Allocating a new indirect jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj\n");
+		indirectDataSectors[j] = new IndirectPointerBlock();
 
-         if (j == existing_blocks + new_blocks - 1) {
-	     DEBUG('1', "We're on the final ipb with a %d value of n\n", n);
-	     int remains = n;
+		if (j == existing_blocks + new_blocks - 1) 
+		{
+			DEBUG('1', "We're on the final ipb with a %d value of n\n", n);
+			int remains = n;
 
-             for (int k=0; k < remains; k++) {
-                 indirectDataSectors[j]->PutSector(freeMap->Find());
-                 n--;
-             }
+			for (int k=0; k < remains; k++) {
+				indirectDataSectors[j]->PutSector(freeMap->Find());
+				n--;
+			}
 
-	     DEBUG('1', "Value of n is %d\n", n);
+			DEBUG('1', "Value of n is %d\n", n);
          }
-         else {
-             for (int k=0; k < PointerSectors; k++) {
+         else 
+		 {
+             for (int k=0; k < PointerSectors; k++) 
+			 {
                  indirectDataSectors[j]->PutSector(freeMap->Find());
-		 n--;
+				 n--;
              }
          }
     }
 
-    if (n == 0) {
+    if (n == 0) 
+	{
        return true;
     }
 
     return false;
 
+	/*
     int numBlocks = divRoundUp(n, PointerSectors);
     int startBlock = divRoundUp((numSectors - 4), PointerSectors) - 1;
 
@@ -354,27 +369,34 @@ bool FileHeader::ExtendFile(BitMap *freeMap, int n, int bytes) {
 
     DEBUG('1', "iiiiiiiiiiiiiiiiiiiiiiiiiiii Extending file with %d indirect blocks and starting at block %d\n", numBlocks, startBlock);
 
-    for (int i=startBlock; i < numBlocks + startBlock; i++) {
-	if (i > indirect_last_index) {
-                DEBUG('1', "============================================================Adding indirect pointer block: %d\n", i);
-		indirectDataSectors[i] = new IndirectPointerBlock();
+    for (int i=startBlock; i < numBlocks + startBlock; i++) 
+	{
+		if (i > indirect_last_index) 
+		{
+			DEBUG('1', "============================================================Adding indirect pointer block: %d\n", i);
+			indirectDataSectors[i] = new IndirectPointerBlock();
         }
 
-        if (i == numBlocks + startBlock - 1) {
-	    for (int j = 0; j < n; j++) {
+        if (i == numBlocks + startBlock - 1) 
+		{
+			for (int j = 0; j < n; j++) 
+			{
                 DEBUG('1', "Indirect block: %d\n", i);
                 indirectDataSectors[i]->PutSector(freeMap->Find());
                 numSectors++;
             }
         }
-        else {
-	    for (int j = 0; j < PointerSectors; j++) {
+        else 
+		{
+			for (int j = 0; j < PointerSectors; j++) 
+			{
                 indirectDataSectors[i]->PutSector(freeMap->Find());
                 n--;
                 numSectors++;
             }
         }
     }
+	*/
 
 //    numBytes += n;
 
