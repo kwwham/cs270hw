@@ -37,6 +37,31 @@
 // There is no constructor; rather the file header can be initialized
 // by allocating blocks for the file (if it is a new file), or by
 // reading it from disk.
+// below is joon's code
+
+#define PointerSectors 	((SectorSize - sizeof(int)) / sizeof(int))
+
+class IndirectPointerBlock {
+public:
+	IndirectPointerBlock() { numSectors = 0; }
+	bool Deallocate(BitMap* freeMap);
+	
+	void PutSector(int sectorNumber);
+	
+	void FetchFrom(int sectorNumber); 	// Initialize file header from disk
+	void WriteBack(int sectorNumber); 	// Write modifications to file header
+	//  back to disk
+	
+	int ByteToSector(int sectorNumber);	// Convert a byte offset into the file
+	// to the disk sector containing
+	// the byte
+private:
+	int numSectors;
+	int dataSectors[PointerSectors];	// Disk sector numbers for each data 
+	// block in the file
+};
+
+
 
 class FileHeader {
   public:
@@ -81,29 +106,5 @@ class FileHeader {
 // -------------					
 };
 
-
-// below is joon's code
-
-#define PointerSectors 	((SectorSize - sizeof(int)) / sizeof(int))
-
-class IndirectPointerBlock {
-	public:
-		IndirectPointerBlock() { numSectors = 0; }
-		bool Deallocate(BitMap* freeMap);
-
-		void PutSector(int sectorNumber);
-
-		void FetchFrom(int sectorNumber); 	// Initialize file header from disk
-		void WriteBack(int sectorNumber); 	// Write modifications to file header
-						//  back to disk
-
-		int ByteToSector(int sectorNumber);	// Convert a byte offset into the file
-											// to the disk sector containing
-											// the byte
-	private:
-		int numSectors;
-		int dataSectors[PointerSectors];	// Disk sector numbers for each data 
-											// block in the file
-};
 
 #endif // FILEHDR_H
