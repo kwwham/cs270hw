@@ -151,8 +151,144 @@ OpenFile::WriteAt(char *from, int numBytes, int position)
     bool firstAligned, lastAligned;
     char *buf;
 
+#ifdef FILESYS
+    numSectors = fileLength/SectorSize;
+	
+    int total_length = fileLength - position + numBytes;
+    int num_sectors = divRoundUp(total_length, SectorSize);
+    int first_file_sector = hdr->ByteToSector(0); // Assume files start at beginning of sector
+	
+    if (first_file_sector + num_sectors > SectorSize*NumSectors) {
+		return 0;
+    }
+	
+#else
     if ((numBytes <= 0) || (position >= fileLength))
-	return 0;				// check request
+		return 0;				// check request
+#endif
+
+#ifdef FILESYS
+// case 1
+if ((position + numBytes) <= fileLength)
+{
+	// do nothing
+}
+	
+// case 2
+else if (position < fileLength) 
+{
+	int last_byte = position;
+	int offset = last_byte - divRoundDown(last_byte, SectorSize)*SectorSize;
+	int newSectors  = divRoundUp(numBytes - (SectorSize - offset), SectorSize);
+	
+	OpenFile* freeMapFile = new OpenFile(FreeMapSector);
+	BitMap* freeMap = new BitMap(NumSectors);
+	
+	DEBUG('1', "Fetching free Map 88888888888888888888888888\n");
+	freeMap->FetchFrom(freeMapFile);
+	DEBUG('1', "DONE Fetching free Map 88888888888888888888888888\n");
+	
+	if (!hdr->ExtendFile(freeMap, newSectors, (position + numBytes))) {
+		printf("Not enough free disk space to write to file. Ignoring write.\n");
+		return 0;
+	}
+	
+	freeMap->WriteBack(freeMapFile);
+	
+	delete freeMapFile;
+	delete freeMap;	
+}
+	
+// case 3
+// position >= filelength
+else 
+{
+	position = fileLength;
+	
+	//DEBUG('1', "Case 3!-------------------------\n");
+	
+	//int last_sector = hdr->ByteToSector(fileLength - 1);
+	int last_byte;
+	
+	if (fileLength == 0) {
+		last_byte = 0;
+	}
+	else {
+		last_byte = fileLength - 1;
+	}
+	
+	int offset = last_byte - divRoundDown(last_byte, SectorSize)*SectorSize;
+	
+	int newSectors  = divRoundUp(numBytes - (SectorSize - offset), SectorSize);
+	
+	DEBUG('1', "Currently have %d sectors and want %d new sectors\n", numSectors, newSectors);
+	
+	if ((numSectors == 0)&&(newSectors == 0)) {
+		newSectors++;
+	}
+	
+	
+	DEBUG('1', "OPENING free Map 88888888888888888888888888\n");
+	OpenFile* freeMapFile = new OpenFile(FreeMapSector);
+	DEBUG('1', "DONE OPENING free Map 88888888888888888888888888\n");
+	BitMap* freeMap = new BitMap(NumSectors);
+	
+	DEBUG('1', "Fetching free Map 88888888888888888888888888\n");
+	freeMap->FetchFrom(freeMapFile);
+	DEBUG('1', "DONE Fetching free Map 88888888888888888888888888\n");;
+	
+	if (!hdr->ExtendFile(freeMap, newSectors, (position + numBytes))) {
+		printf("Not enough free disk space to write to file. Ignoring write.\n");
+		return 0;
+	}
+	
+	DEBUG('1', "STARTING FREE MAP WRITE BACK 9999999999999999999999999999999999999\n");;
+	freeMap->WriteBack(freeMapFile);
+	DEBUG('1', "DONE Writing Back free Map 9999999999999999999999999999999999999\n");
+	
+	delete freeMapFile;
+	delete freeMap;
+	
+	fileLength = hdr->FileLength();
+	
+	
+}
+
+	
+// ----------------------------------------- common for all three cases -----------------------------
+	if ((position + numBytes) > fileLength)
+		numBytes = fileLength - position;
+    DEBUG('f', "Writing %d bytes at %d, from file of length %d.\n", 	
+		  numBytes, position, fileLength);
+	
+    firstSector = divRoundDown(position, SectorSize);
+    lastSector = divRoundDown(position + numBytes - 1, SectorSize);
+    numSectors = 1 + lastSector - firstSector;
+	
+    buf = new char[numSectors * SectorSize];
+	
+    firstAligned = (position == (firstSector * SectorSize));
+    lastAligned = ((position + numBytes) == ((lastSector + 1) * SectorSize));
+	
+	// read in first and last sector, if they are to be partially modified
+    if (!firstAligned)
+        ReadAt(buf, SectorSize, firstSector * SectorSize);	
+    if (!lastAligned && ((firstSector != lastSector) || firstAligned))
+        ReadAt(&buf[(lastSector - firstSector) * SectorSize], 
+			   SectorSize, lastSector * SectorSize);	
+	
+	// copy in the bytes we want to change 
+    bcopy(from, &buf[position - (firstSector * SectorSize)], numBytes);
+	
+	// write modified sectors back
+    for (i = firstSector; i <= lastSector; i++)	
+        synchDisk->WriteSector(hdr->ByteToSector(i * SectorSize), 
+							   &buf[(i - firstSector) * SectorSize]);
+    delete [] buf;
+	return numBytes;
+// ------------------------------------------ end of the common code --------------------------------
+#endif
+	
     if ((position + numBytes) > fileLength)
 	numBytes = fileLength - position;
     DEBUG('f', "Writing %d bytes at %d, from file of length %d.\n", 	
