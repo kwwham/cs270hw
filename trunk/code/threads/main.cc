@@ -174,6 +174,7 @@ printf("1000 Threads with 16MB Memory: %f\n", CostTest(1000, 16*1024*1024));
 	    fileSystem->Remove(*(argv + 1));
 	    argCount = 2;
 	} else if (!strcmp(*argv, "-l")) {	// list Nachos directory
+		printf("-l option enabled");
             fileSystem->List();
 	} else if (!strcmp(*argv, "-D")) {	// print entire filesystem
             fileSystem->Print();
