@@ -137,7 +137,7 @@ printf("1000 Threads with 16MB Memory: %f\n", CostTest(1000, 16*1024*1024));
 #endif //HW1_COST
 
 #endif //THREAD?
-
+printf("for debugging, before for loop");.
 // printf("before the for loop\n");
     for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
 // printf("inside the for loop\n");
