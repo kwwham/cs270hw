@@ -91,9 +91,9 @@ main(int argc, char **argv)
     DEBUG('t', "Entering main");
     (void) Initialize(argc, argv); 
  
-
+// printf("Entering main\n");
     
-#ifdef THREADS
+#ifdef THREADS1
     for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
       argCount = 1;
       switch (argv[0][1]) {
@@ -110,8 +110,10 @@ main(int argc, char **argv)
 #ifdef HW1_TASK3
 ConditionTestMain();
 #else
+printf("before ThreadTest\n");
 ThreadTest();
-#endif 
+printf("end ThreadTest\n");
+#endif // HW1_TASK3
 
 #if defined(HW1_COST)
 printf("everage time of switching: %f\n", scheduler->getAverageTime());
@@ -132,17 +134,19 @@ printf("2 Threads with 16MB Memory: %f\n", CostTest(2, 16*1024*1024));
 printf("10 Threads with 16MB Memory: %f\n", CostTest(10, 16*1024*1024));
 printf("1000 Threads with 16MB Memory: %f\n", CostTest(1000, 16*1024*1024)); 
 
-#endif
+#endif //HW1_COST
 
-#endif
+#endif //THREAD?
 
+// printf("before the for loop\n");
     for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
+// printf("inside the for loop\n");
 	argCount = 1;
         if (!strcmp(*argv, "-z"))               // print copyright
             printf (copyright);
 #ifdef USER_PROGRAM 
 //- userprog/nachos -x binarycode
-		//printf("Entering main.cc\n");
+// printf("Entering main.cc\n");
         if (!strcmp(*argv, "-x")) {        	// run a user program
 	    ASSERT(argc > 1);
             StartProcess(*(argv + 1));
@@ -161,6 +165,7 @@ printf("1000 Threads with 16MB Memory: %f\n", CostTest(1000, 16*1024*1024));
 	}
 #endif // USER_PROGRAM
 #ifdef FILESYS
+// printf("Entering FILESYS\n");
 	if (!strcmp(*argv, "-cp")) { 		// copy from UNIX to Nachos
 	    ASSERT(argc > 2);
 	    Copy(*(argv + 1), *(argv + 2));
@@ -174,13 +179,14 @@ printf("1000 Threads with 16MB Memory: %f\n", CostTest(1000, 16*1024*1024));
 	    fileSystem->Remove(*(argv + 1));
 	    argCount = 2;
 	} else if (!strcmp(*argv, "-l")) {	// list Nachos directory
-		printf("-l option enabled");
             fileSystem->List();
 	} else if (!strcmp(*argv, "-D")) {	// print entire filesystem
             fileSystem->Print();
 	} else if (!strcmp(*argv, "-t")) {	// performance test 
             PerformanceTest();
 	}
+#else
+// printf("FILESYS not defined\n");
 #endif // FILESYS
 #ifdef NETWORK
         if (!strcmp(*argv, "-o")) {
