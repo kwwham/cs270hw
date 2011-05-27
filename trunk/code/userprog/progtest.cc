@@ -30,8 +30,13 @@ StartProcess(char *filename)
 	printf("Unable to open file %s\n", filename);
 	return;
     }
+
+    DEBUG('m', "So far so good doc\n");
+
     space = new AddrSpace(executable);    
     currentThread->space = space;
+
+    currentThread->space->pcb->SetThread(currentThread);
 
     delete executable;			// close file
 
