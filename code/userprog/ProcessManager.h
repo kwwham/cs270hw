@@ -10,8 +10,14 @@
 #include "bitmap.h"
 #include "syscall.h"
 #include "PCB.h"
-#define MAX_PROCESS MemorySize/UserStackSize*2
 
+#ifdef VM
+#include "SwapManager.h"
+
+#define MAX_PROCESS SWAPSIZE*PageSize/UserStackSize
+#else
+#define MAX_PROCESS MemorySize/UserStackSize*2
+#endif
 
 class ProcessManager {
 	public:

@@ -15,10 +15,10 @@
 
 #include "copyright.h"
 #include "filesys.h"
+#include "syscall.h"
 
 #include "PCB.h"
 
-#include "syscall.h"
 #define UserStackSize		1024 	// increase this as necessary!
 
 class AddrSpace {
@@ -26,22 +26,25 @@ class AddrSpace {
     AddrSpace(OpenFile *executable);	// Create an address space,
 					// initializing it with the program
 					// stored in the file "executable"
+    AddrSpace(TranslationEntry* table, int page_count, int oldPID);
     ~AddrSpace();			// De-allocate an address space
 
     void InitRegisters();		// Initialize user-level CPU registers,
 					// before jumping to user code
 
+    bool Translate(int vaddr, int* paddr, bool writing);
+
+    int ReadFile(int vaddr, OpenFile* file, int size, int fileAddr);
+
+    int Clone(AddrSpace** copySpace);
+
+    void SysCallDone();
+
     void SaveState();			// Save/restore address space-specific
-    void RestoreState();		// info on a context switch 
+    void RestoreState();		// info on a context switch
 
-	AddrSpace(TranslationEntry* table, int page_count, int oldPID);
-	PCB* pcb;
-/* Functions that we have included */
-
-	bool Translate(int vaddr, int* paddr, bool writing);
-	void SysCallDone();
-	int Clone(AddrSpace** copySpace);
-	int ReadFile(int vaddr, OpenFile* file, int size, int fileAddr);
+    //SpaceId spaceId;
+    PCB* pcb;
 
   private:
     TranslationEntry *pageTable;	// Assume linear page table translation

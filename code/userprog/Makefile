@@ -9,8 +9,7 @@
 # All rights reserved.  See copyright.h for copyright notice and limitation 
 # of liability and disclaimer of warranty provisions.
 
-# DEFINES = -DUSER_PROGRAM -DFILESYS_NEEDED -DFILESYS
-DEFINES = -DTHREADS -DUSER_PROGRAM -DVM -DFILESYS_NEEDED -DFILESYS
+DEFINES = -DUSER_PROGRAM -DFILESYS_NEEDED -DFILESYS_STUB
 INCPATH = -I../bin -I../filesys -I../userprog -I../threads -I../machine
 HFILES = $(THREAD_H) $(USERPROG_H)
 CFILES = $(THREAD_C) $(USERPROG_C)
@@ -41,7 +40,7 @@ main.o: ../threads/main.cc ../threads/copyright.h ../threads/utility.h \
  /usr/include/xlocale.h ../threads/system.h ../threads/thread.h \
  ../machine/machine.h ../threads/utility.h ../machine/translate.h \
  ../machine/disk.h ../userprog/addrspace.h ../filesys/filesys.h \
- ../filesys/openfile.h ../userprog/PCB.h ../userprog/syscall.h \
+ ../filesys/openfile.h ../userprog/syscall.h ../userprog/PCB.h \
  ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h ../userprog/bitmap.h \
  ../filesys/openfile.h ../userprog/syscall.h ../userprog/bitmap.h \
  ../threads/scheduler.h ../threads/list.h ../machine/interrupt.h \
@@ -59,19 +58,6 @@ list.o: ../threads/list.cc ../threads/copyright.h ../threads/list.h \
  ../threads/stdarg.h /usr/include/bits/stdio_lim.h \
  /usr/include/bits/sys_errlist.h /usr/include/string.h \
  /usr/include/xlocale.h
-filesys.o: ../filesys/filesys.cc ../threads/copyright.h ../machine/disk.h \
- ../threads/utility.h ../threads/copyright.h ../threads/bool.h \
- ../machine/sysdep.h /usr/include/stdio.h /usr/include/features.h \
- /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
- /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h \
- /usr/lib/gcc/i686-redhat-linux/4.4.5/include/stddef.h \
- /usr/include/bits/types.h /usr/include/bits/typesizes.h \
- /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- ../threads/stdarg.h /usr/include/bits/stdio_lim.h \
- /usr/include/bits/sys_errlist.h /usr/include/string.h \
- /usr/include/xlocale.h ../userprog/bitmap.h ../filesys/openfile.h \
- ../filesys/directory.h ../filesys/openfile.h ../filesys/filehdr.h \
- ../filesys/filesys.h
 scheduler.o: ../threads/scheduler.cc ../threads/copyright.h \
  ../threads/scheduler.h ../threads/list.h ../threads/utility.h \
  ../threads/bool.h ../machine/sysdep.h ../threads/copyright.h \
@@ -86,7 +72,7 @@ scheduler.o: ../threads/scheduler.cc ../threads/copyright.h \
  /usr/include/xlocale.h ../threads/thread.h ../machine/machine.h \
  ../threads/utility.h ../machine/translate.h ../machine/disk.h \
  ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
- ../userprog/PCB.h ../userprog/syscall.h ../filesys/UserOpenFile.h \
+ ../userprog/syscall.h ../userprog/PCB.h ../filesys/UserOpenFile.h \
  ../filesys/SysOpenFile.h ../userprog/bitmap.h ../filesys/openfile.h \
  ../userprog/syscall.h ../userprog/bitmap.h ../threads/system.h \
  ../machine/interrupt.h ../threads/list.h ../machine/stats.h \
@@ -108,8 +94,8 @@ synch.o: ../threads/synch.cc ../threads/copyright.h ../threads/synch.h \
  /usr/include/bits/sys_errlist.h /usr/include/string.h \
  /usr/include/xlocale.h ../machine/machine.h ../threads/utility.h \
  ../machine/translate.h ../machine/disk.h ../userprog/addrspace.h \
- ../filesys/filesys.h ../filesys/openfile.h ../userprog/PCB.h \
- ../userprog/syscall.h ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../userprog/syscall.h \
+ ../userprog/PCB.h ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h \
  ../userprog/bitmap.h ../filesys/openfile.h ../userprog/syscall.h \
  ../userprog/bitmap.h ../threads/list.h ../threads/system.h \
  ../threads/scheduler.h ../machine/interrupt.h ../threads/list.h \
@@ -129,7 +115,7 @@ synchlist.o: ../threads/synchlist.cc ../threads/copyright.h \
  /usr/include/xlocale.h ../threads/synch.h ../threads/thread.h \
  ../machine/machine.h ../threads/utility.h ../machine/translate.h \
  ../machine/disk.h ../userprog/addrspace.h ../filesys/filesys.h \
- ../filesys/openfile.h ../userprog/PCB.h ../userprog/syscall.h \
+ ../filesys/openfile.h ../userprog/syscall.h ../userprog/PCB.h \
  ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h ../userprog/bitmap.h \
  ../filesys/openfile.h ../userprog/syscall.h ../userprog/bitmap.h
 system.o: ../threads/system.cc ../threads/copyright.h ../threads/system.h \
@@ -145,7 +131,7 @@ system.o: ../threads/system.cc ../threads/copyright.h ../threads/system.h \
  /usr/include/xlocale.h ../threads/thread.h ../machine/machine.h \
  ../threads/utility.h ../machine/translate.h ../machine/disk.h \
  ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
- ../userprog/PCB.h ../userprog/syscall.h ../filesys/UserOpenFile.h \
+ ../userprog/syscall.h ../userprog/PCB.h ../filesys/UserOpenFile.h \
  ../filesys/SysOpenFile.h ../userprog/bitmap.h ../filesys/openfile.h \
  ../userprog/syscall.h ../userprog/bitmap.h ../threads/scheduler.h \
  ../threads/list.h ../machine/interrupt.h ../threads/list.h \
@@ -164,8 +150,8 @@ thread.o: ../threads/thread.cc ../threads/copyright.h ../threads/thread.h \
  /usr/include/bits/sys_errlist.h /usr/include/string.h \
  /usr/include/xlocale.h ../machine/machine.h ../threads/utility.h \
  ../machine/translate.h ../machine/disk.h ../userprog/addrspace.h \
- ../filesys/filesys.h ../filesys/openfile.h ../userprog/PCB.h \
- ../userprog/syscall.h ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../userprog/syscall.h \
+ ../userprog/PCB.h ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h \
  ../userprog/bitmap.h ../filesys/openfile.h ../userprog/syscall.h \
  ../userprog/bitmap.h ../threads/switch.h ../threads/synch.h \
  ../threads/list.h ../threads/system.h ../threads/scheduler.h \
@@ -197,7 +183,7 @@ threadtest.o: ../threads/threadtest.cc ../threads/copyright.h \
  /usr/include/xlocale.h ../threads/thread.h ../machine/machine.h \
  ../threads/utility.h ../machine/translate.h ../machine/disk.h \
  ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
- ../userprog/PCB.h ../userprog/syscall.h ../filesys/UserOpenFile.h \
+ ../userprog/syscall.h ../userprog/PCB.h ../filesys/UserOpenFile.h \
  ../filesys/SysOpenFile.h ../userprog/bitmap.h ../filesys/openfile.h \
  ../userprog/syscall.h ../userprog/bitmap.h ../threads/scheduler.h \
  ../threads/list.h ../machine/interrupt.h ../threads/list.h \
@@ -221,7 +207,7 @@ interrupt.o: ../machine/interrupt.cc ../threads/copyright.h \
  /usr/include/xlocale.h ../threads/system.h ../threads/thread.h \
  ../machine/machine.h ../threads/utility.h ../machine/translate.h \
  ../machine/disk.h ../userprog/addrspace.h ../filesys/filesys.h \
- ../filesys/openfile.h ../userprog/PCB.h ../userprog/syscall.h \
+ ../filesys/openfile.h ../userprog/syscall.h ../userprog/PCB.h \
  ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h ../userprog/bitmap.h \
  ../filesys/openfile.h ../userprog/syscall.h ../userprog/bitmap.h \
  ../threads/scheduler.h ../threads/list.h ../machine/interrupt.h \
@@ -269,7 +255,7 @@ sysdep.o: ../machine/sysdep.cc ../threads/copyright.h \
  ../threads/system.h ../threads/thread.h ../machine/machine.h \
  ../threads/utility.h ../machine/translate.h ../machine/disk.h \
  ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
- ../userprog/PCB.h ../userprog/syscall.h ../filesys/UserOpenFile.h \
+ ../userprog/syscall.h ../userprog/PCB.h ../filesys/UserOpenFile.h \
  ../filesys/SysOpenFile.h ../userprog/bitmap.h ../filesys/openfile.h \
  ../userprog/syscall.h ../userprog/bitmap.h ../threads/scheduler.h \
  ../threads/list.h ../machine/interrupt.h ../machine/stats.h \
@@ -299,7 +285,7 @@ timer.o: ../machine/timer.cc ../threads/copyright.h ../machine/timer.h \
  /usr/include/xlocale.h ../threads/system.h ../threads/utility.h \
  ../threads/thread.h ../machine/machine.h ../machine/translate.h \
  ../machine/disk.h ../userprog/addrspace.h ../filesys/filesys.h \
- ../filesys/openfile.h ../userprog/PCB.h ../userprog/syscall.h \
+ ../filesys/openfile.h ../userprog/syscall.h ../userprog/PCB.h \
  ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h ../userprog/bitmap.h \
  ../filesys/openfile.h ../userprog/syscall.h ../userprog/bitmap.h \
  ../threads/scheduler.h ../threads/list.h ../machine/interrupt.h \
@@ -320,7 +306,7 @@ addrspace.o: ../userprog/addrspace.cc ../threads/copyright.h \
  /usr/include/xlocale.h ../threads/thread.h ../machine/machine.h \
  ../threads/utility.h ../machine/translate.h ../machine/disk.h \
  ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
- ../userprog/PCB.h ../userprog/syscall.h ../filesys/UserOpenFile.h \
+ ../userprog/syscall.h ../userprog/PCB.h ../filesys/UserOpenFile.h \
  ../filesys/SysOpenFile.h ../userprog/bitmap.h ../filesys/openfile.h \
  ../userprog/syscall.h ../userprog/bitmap.h ../threads/scheduler.h \
  ../threads/list.h ../machine/interrupt.h ../threads/list.h \
@@ -427,7 +413,7 @@ exception.o: ../userprog/exception.cc ../threads/copyright.h \
  /usr/include/xlocale.h ../threads/thread.h ../machine/machine.h \
  ../threads/utility.h ../machine/translate.h ../machine/disk.h \
  ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
- ../userprog/PCB.h ../userprog/syscall.h ../filesys/UserOpenFile.h \
+ ../userprog/syscall.h ../userprog/PCB.h ../filesys/UserOpenFile.h \
  ../filesys/SysOpenFile.h ../userprog/bitmap.h ../filesys/openfile.h \
  ../userprog/syscall.h ../userprog/bitmap.h ../threads/scheduler.h \
  ../threads/list.h ../machine/interrupt.h ../threads/list.h \
@@ -521,7 +507,7 @@ progtest.o: ../userprog/progtest.cc ../threads/copyright.h \
  /usr/include/xlocale.h ../threads/thread.h ../machine/machine.h \
  ../threads/utility.h ../machine/translate.h ../machine/disk.h \
  ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
- ../userprog/PCB.h ../userprog/syscall.h ../filesys/UserOpenFile.h \
+ ../userprog/syscall.h ../userprog/PCB.h ../filesys/UserOpenFile.h \
  ../filesys/SysOpenFile.h ../userprog/bitmap.h ../filesys/openfile.h \
  ../userprog/syscall.h ../userprog/bitmap.h ../threads/scheduler.h \
  ../threads/list.h ../machine/interrupt.h ../threads/list.h \
@@ -544,48 +530,8 @@ SysOpenFile.o: ../filesys/SysOpenFile.cc ../filesys/SysOpenFile.h \
  ../userprog/syscall.h ../threads/synch.h ../threads/thread.h \
  ../threads/utility.h ../machine/machine.h ../machine/translate.h \
  ../machine/disk.h ../userprog/addrspace.h ../filesys/filesys.h \
- ../userprog/PCB.h ../userprog/syscall.h ../filesys/UserOpenFile.h \
+ ../userprog/syscall.h ../userprog/PCB.h ../filesys/UserOpenFile.h \
  ../userprog/bitmap.h ../threads/list.h
-openfile.o: ../filesys/openfile.cc ../threads/copyright.h \
- ../filesys/filehdr.h ../machine/disk.h ../threads/utility.h \
- ../threads/copyright.h ../threads/bool.h ../machine/sysdep.h \
- /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h \
- /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
- /usr/include/gnu/stubs-32.h \
- /usr/lib/gcc/i686-redhat-linux/4.4.5/include/stddef.h \
- /usr/include/bits/types.h /usr/include/bits/typesizes.h \
- /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- ../threads/stdarg.h /usr/include/bits/stdio_lim.h \
- /usr/include/bits/sys_errlist.h /usr/include/string.h \
- /usr/include/xlocale.h ../userprog/bitmap.h ../filesys/openfile.h \
- ../filesys/openfile.h ../threads/system.h ../threads/utility.h \
- ../threads/thread.h ../machine/machine.h ../machine/translate.h \
- ../machine/disk.h ../userprog/addrspace.h ../filesys/filesys.h \
- ../userprog/PCB.h ../userprog/syscall.h ../filesys/UserOpenFile.h \
- ../filesys/SysOpenFile.h ../userprog/syscall.h ../userprog/bitmap.h \
- ../threads/scheduler.h ../threads/list.h ../machine/interrupt.h \
- ../threads/list.h ../machine/stats.h ../machine/timer.h \
- ../threads/synch.h ../userprog/MemoryManager.h ../threads/synch.h \
- ../userprog/ProcessManager.h ../filesys/SysOpenFile.h \
- ../filesys/synchdisk.h
-synchdisk.o: ../filesys/synchdisk.cc ../threads/copyright.h \
- ../filesys/synchdisk.h ../machine/disk.h ../threads/utility.h \
- ../threads/copyright.h ../threads/bool.h ../machine/sysdep.h \
- /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h \
- /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
- /usr/include/gnu/stubs-32.h \
- /usr/lib/gcc/i686-redhat-linux/4.4.5/include/stddef.h \
- /usr/include/bits/types.h /usr/include/bits/typesizes.h \
- /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- ../threads/stdarg.h /usr/include/bits/stdio_lim.h \
- /usr/include/bits/sys_errlist.h /usr/include/string.h \
- /usr/include/xlocale.h ../threads/synch.h ../threads/thread.h \
- ../threads/utility.h ../machine/machine.h ../machine/translate.h \
- ../machine/disk.h ../userprog/addrspace.h ../filesys/filesys.h \
- ../filesys/openfile.h ../userprog/PCB.h ../userprog/syscall.h \
- ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h ../userprog/bitmap.h \
- ../filesys/openfile.h ../userprog/syscall.h ../userprog/bitmap.h \
- ../threads/list.h
 console.o: ../machine/console.cc ../threads/copyright.h \
  ../machine/console.h ../threads/utility.h ../threads/copyright.h \
  ../threads/bool.h ../machine/sysdep.h /usr/include/stdio.h \
@@ -600,7 +546,7 @@ console.o: ../machine/console.cc ../threads/copyright.h \
  /usr/include/xlocale.h ../threads/system.h ../threads/utility.h \
  ../threads/thread.h ../machine/machine.h ../machine/translate.h \
  ../machine/disk.h ../userprog/addrspace.h ../filesys/filesys.h \
- ../filesys/openfile.h ../userprog/PCB.h ../userprog/syscall.h \
+ ../filesys/openfile.h ../userprog/syscall.h ../userprog/PCB.h \
  ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h ../userprog/bitmap.h \
  ../filesys/openfile.h ../userprog/syscall.h ../userprog/bitmap.h \
  ../threads/scheduler.h ../threads/list.h ../machine/interrupt.h \
@@ -621,7 +567,7 @@ machine.o: ../machine/machine.cc ../threads/copyright.h \
  /usr/include/xlocale.h ../machine/translate.h ../machine/disk.h \
  ../threads/system.h ../threads/utility.h ../threads/thread.h \
  ../machine/machine.h ../userprog/addrspace.h ../filesys/filesys.h \
- ../filesys/openfile.h ../userprog/PCB.h ../userprog/syscall.h \
+ ../filesys/openfile.h ../userprog/syscall.h ../userprog/PCB.h \
  ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h ../userprog/bitmap.h \
  ../filesys/openfile.h ../userprog/syscall.h ../userprog/bitmap.h \
  ../threads/scheduler.h ../threads/list.h ../machine/interrupt.h \
@@ -642,8 +588,8 @@ mipssim.o: ../machine/mipssim.cc ../threads/copyright.h \
  /usr/include/xlocale.h ../machine/translate.h ../machine/disk.h \
  ../machine/mipssim.h ../threads/system.h ../threads/utility.h \
  ../threads/thread.h ../machine/machine.h ../userprog/addrspace.h \
- ../filesys/filesys.h ../filesys/openfile.h ../userprog/PCB.h \
- ../userprog/syscall.h ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../userprog/syscall.h \
+ ../userprog/PCB.h ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h \
  ../userprog/bitmap.h ../filesys/openfile.h ../userprog/syscall.h \
  ../userprog/bitmap.h ../threads/scheduler.h ../threads/list.h \
  ../machine/interrupt.h ../threads/list.h ../machine/stats.h \
@@ -662,7 +608,7 @@ translate.o: ../machine/translate.cc ../threads/copyright.h \
  /usr/include/bits/sys_errlist.h /usr/include/string.h \
  /usr/include/xlocale.h ../machine/translate.h ../machine/disk.h \
  ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
- ../userprog/PCB.h ../userprog/syscall.h ../filesys/UserOpenFile.h \
+ ../userprog/syscall.h ../userprog/PCB.h ../filesys/UserOpenFile.h \
  ../filesys/SysOpenFile.h ../userprog/bitmap.h ../filesys/openfile.h \
  ../userprog/syscall.h ../userprog/bitmap.h ../threads/system.h \
  ../threads/utility.h ../threads/thread.h ../machine/machine.h \
@@ -684,8 +630,8 @@ MemoryManager.o: ../userprog/MemoryManager.cc ../threads/copyright.h \
  /usr/include/xlocale.h ../filesys/openfile.h ../threads/synch.h \
  ../threads/thread.h ../threads/utility.h ../machine/machine.h \
  ../machine/translate.h ../machine/disk.h ../userprog/addrspace.h \
- ../filesys/filesys.h ../filesys/openfile.h ../userprog/PCB.h \
- ../userprog/syscall.h ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../userprog/syscall.h \
+ ../userprog/PCB.h ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h \
  ../userprog/bitmap.h ../userprog/syscall.h ../threads/list.h \
  ../threads/system.h ../threads/scheduler.h ../machine/interrupt.h \
  ../threads/list.h ../machine/stats.h ../machine/timer.h \
@@ -704,8 +650,8 @@ ProcessManager.o: ../userprog/ProcessManager.cc ../threads/copyright.h \
  /usr/include/bits/sys_errlist.h /usr/include/string.h \
  /usr/include/xlocale.h ../machine/machine.h ../threads/utility.h \
  ../machine/translate.h ../machine/disk.h ../userprog/addrspace.h \
- ../filesys/filesys.h ../filesys/openfile.h ../userprog/PCB.h \
- ../userprog/syscall.h ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../userprog/syscall.h \
+ ../userprog/PCB.h ../filesys/UserOpenFile.h ../filesys/SysOpenFile.h \
  ../userprog/bitmap.h ../filesys/openfile.h ../userprog/syscall.h \
  ../userprog/bitmap.h ../threads/list.h
 PCB.o: ../userprog/PCB.cc ../userprog/PCB.h ../userprog/syscall.h \
