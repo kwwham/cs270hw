@@ -1,0 +1,12 @@
+Part 2
+We changed openfile.cc, filehdr.cc, directory.cc in the filesys directory. We have succeeded all work and tested perfectly. 
+We added are as follows,
+
+Added Directory::ExpandTable in the directory.cc in order to allow more directory entries.
+Changed OpenFile::WriteAt in the openfile.cc to implement writing a large file
+Added IndirectPointerBlock class and its associated functions, FileHeader::ByteToSector, FileHeader::ExtendFile to the filehdr.cc
+
+These command lines were used to test our implementation. Basically, testcpall and testexec forks other programs such as bigfile1, cpbig, etc. So, we did not include the commands for those forked binaries. 
+./nachos -f -cp ../test2/testcpall testcpall -cp ../test2/bigfile1 bigfile1 -cp ../test2/cpbig cpbig -x testcpall
+./nachos -f -cp ../test2/testexec testexec -cp ../test2/bigfile1 bigfile1 -cp ../test2/bigfile2 bigfile2 -x testexe
+
